@@ -21,6 +21,7 @@
 	- A lot of features are missing
 		- Doesn't keep track of what songs are in what playlists
 		- Playlists aren't tied to a user
+		- If a song has multiple artists it only adds the first
 		- etc
 
 - I have to update `package.json` to include dependencies so `npm install` doesn't do anything yet
