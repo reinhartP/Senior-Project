@@ -14,7 +14,7 @@
 	- Some dependencies might not be installed, I might have forgetten to include them in packages.json. It will tell you what is missing so just do `npm install 'missing_dependency'`
 	- If it runs then you can go to `localhost:3000/signup`, `localhost:3000/signin`, `localhost:3000/logout`, `localhost:3000/dashboard`
 
-#Spotify
+# Spotify
 
 - Currently only copies all playlist names, songs, and artists to a database
 	- Songs in the database are tied to an artist
