@@ -1,3 +1,16 @@
+# LoginSpotify
+
+- Create a `.env` file in `/LoginSpotify` and add these lines to the file:
+	```
+	NODE_ENV='development'
+	CLIENT_SECRET='' //add spotify client secret
+	CLIENT_ID=''	//add spotify client id
+	```
+- Run `npm install` to install dependencies
+- `node index.js` to run
+	- Go to `localhost:3000/`
+		- `/signin`, `/signup`, `/dashboard`, `/spotify`
+
 # Login
 
 - Can register, signin, and logout.
