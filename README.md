@@ -6,6 +6,11 @@
 	CLIENT_SECRET='' //add spotify client secret
 	CLIENT_ID=''	//add spotify client id
 	```
+- Database
+	- Edit `/config/config.json` with database details
+		- development.username is mysql username
+		- development.password is mysql password
+		- development.database is database name
 - Run `npm install` to install dependencies
 - `node server.js` to run
 	- Go to `localhost:3000/`
