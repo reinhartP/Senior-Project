@@ -1,0 +1,30 @@
+{
+    "development": {
+        "username": "root",
+        "password": "rootPassword",
+        "database": "passportdb",
+        "host": "127.0.0.1",
+        "dialect": "mysql",
+        "logging": false,
+        "pool": {
+            "max": 50,
+            "min": 5,
+            "acquire": 100000
+        }
+    },
+    "test": {
+        "username": "",
+        "password": null,
+        "database": "",
+        "host": "",
+        "dialect": "mysql"
+    },
+ 
+    "production": {
+        "username": "",
+        "password": null,
+        "database": "",
+        "host": "127.0.0.1",
+        "dialect": "mysql"
+    }
+}
