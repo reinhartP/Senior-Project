@@ -40,7 +40,7 @@ exports.spotify = function(req, res) {
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
             response_type: 'code',
-            client_id: '48e26e2289e640e5a9c439c22a209460',
+            client_id: process.env.CLIENT_ID,
             scope: scope,
             redirect_uri: 'http://localhost:3000/callback',
             state: state,
