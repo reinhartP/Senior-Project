@@ -7,7 +7,7 @@
 	CLIENT_ID=''	//add spotify client id
 	```
 - Run `npm install` to install dependencies
-- `node index.js` to run
+- `node server.js` to run
 	- Go to `localhost:3000/`
 		- `/signin`, `/signup`, `/dashboard`, `/spotify`
 
