@@ -1,13 +1,5 @@
 
 # Senior Proj
-- Can register, signin, and logout.
-- Currently only copies all playlist names, songs, and artists to a database
-	- Songs in the database are tied to an artist
-	- A lot of features are missing
-		- Doesn't keep track of what songs are in what playlists
-		- Playlists aren't tied to a user
-		- If a song has multiple artists it only adds the first
-		- etc
 
 ## Instructions
 - Install packages: `npm install`
@@ -42,7 +34,14 @@
 - Unlink Google account from local account
 - Link an existing local account with an existing Google account
     - Removes the record of the existing local account and merges it into the record of the existing Google account
-
+    
+- Currently only copies all playlist names, songs, and artists to a database
+	- Songs in the database are tied to an artist
+	- A lot of features are missing
+		- Doesn't keep track of what songs are in what playlists
+		- Playlists aren't tied to a user
+		- If a song has multiple artists it only adds the first
+		- etc
 
 ## Issues
 
