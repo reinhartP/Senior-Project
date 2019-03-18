@@ -79,11 +79,11 @@ module.exports = function(app, passport) {
     app.get('/unlink/google', authController.unlinkGoogle);
 
     //spotify
-    app.get('/spotify/sync', authController.spotify);
+    app.get('/spotify/sync', isLoggedIn, authController.spotify);
 
-    app.get('/spotify/callback', authController.spotifyCallback);
+    app.get('/spotify/callback', isLoggedIn, authController.spotifyCallback);
 
-    app.get('/spotify/playlist', authController.spotifyPlaylist);
+    app.get('/spotify/playlist', isLoggedIn, authController.spotifyPlaylist);
 };
 
 // route middleware to make sure a user is logged in
