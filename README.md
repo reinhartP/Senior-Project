@@ -24,6 +24,7 @@
     ```
 - Launch: `node server.js`
 - Visit in your browser at `http://localhost:3000`
+- `localhost:3000/spotify/sync` to sync spotify
 
 ## Usage
 
@@ -34,7 +35,7 @@
 - Unlink Google account from local account
 - Link an existing local account with an existing Google account
     - Removes the record of the existing local account and merges it into the record of the existing Google account
-    
+
 - Currently only copies all playlist names, songs, and artists to a database
 	- Songs in the database are tied to an artist
 	- A lot of features are missing
