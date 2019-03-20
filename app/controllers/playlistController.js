@@ -84,6 +84,14 @@ module.exports = function(token, models) {
             playlists.items[i].id = data.items[i].tracks.href;
             playlists.items[i].total = data.items[i].tracks.total;
         }
+        /*playlists.items.sort((a,b) => {   //sort playlists from smallest to largest
+            let keyA = a.total;
+            let keyB = b.total;
+            if(keyA < keyB)
+                return -1;
+            if(keyA > keyB)
+                return 1;
+        });*/
         addPlaylist(playlists);                              //adds playlists to db
         return playlists;
     }
