@@ -22,9 +22,39 @@ exports.logout = function(req, res) {
 }
 
 exports.profile = function(req, res) {
-    res.render('profile.ejs', {
-        user : req.user
-    });
+    let Playlist = models.playlist;
+    playlists = {
+        "items": []
+    };
+    async function main() { //main function that does everything
+        try{
+            const data = await fetchPlaylists(req.user.id);     //stores returned api info in data
+            const playlists = await getPlaylist(data);      //stores object with playlist info(name, id) in playlists
+            res.render('profile.ejs', {
+                user : req.user,
+                playlists: playlists.items,
+            });
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+    const fetchPlaylists = async(userId) => {
+        const artistId = await Playlist.findAll({
+            where: {
+                userId: userId,
+            }
+        });
+        return artistId;                                    //returns the row information that was found/inserted
+    }
+    const getPlaylist = async(data) => {
+        for(let i = 0; i < data.length; i++) {
+            playlists.items[i] = {};
+            playlists.items[i].name = data[i].name;
+        }
+        return playlists;                                    //returns the row information that was found/inserted
+    }
+    main();
 };
 
 exports.connect = function(req, res) {
@@ -79,17 +109,23 @@ exports.spotifyCallback = function(req, res) {
 exports.spotifyPlaylist = function(req, res) {
     async function main() { //main function that does everything
         try{
-            const playlsits = await PlaylistController(tokens, models);
+            await PlaylistController(tokens, models, req.user.id);
+            await delay(100);
+            redirect();
         }
         catch(err) {
             console.log(err);
         }
     }
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    const redirect = async() => {
+        res.redirect('/profile');
+    }
     //res.header("Content-Type", 'application/json');
     //res.send(JSON.stringify(tokens, null, 4));
     //res.render('profile.ejs', {title: 'Spotify playlist', accessToken: tokens.access_token, refreshToken: tokens.refresh_token});
     main();
-    res.redirect('/profile');
+    
 }
 
 exports.search = function(req, res) {

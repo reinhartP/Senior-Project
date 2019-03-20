@@ -47,7 +47,7 @@
                 <!-- check if the user has this token (is the user authenticated with this social account) -->
                 <% if (user.googleToken) { %>
                     <p>
-                        <strong>id</strong>: <%= user.googleId %><br>
+                        <strong>id</strong>: <%= playlists %><br>
                         <strong>token</strong>: <%= user.googleToken %><br>
                         <strong>email</strong>: <%= user.googleEmail %><br>
                         <strong>name</strong>: <%= user.googleName %>
@@ -66,10 +66,23 @@
             <div class="well">
                 <h3><i class="fab fa-spotify"></i> Spotify</h3>
                 <a href="/spotify/sync" class="btn btn-success">Sync Spotify</a>
+                <% if (playlists) { %>
+                    <p>
+                        <table>
+                            <% for(let i=0; i < playlists.length; i++) { %>
+                                <tr>
+                                    <td><%= playlists[i].name %></td>
+                                </tr>
+                            <% } %>
+                        </table>
+                    </p>
+                <% } 
+                else { %>
+                    
+                <% } %>
             </div>
         </div>
     </div>
-
 </div>
 </body>
 </html>
