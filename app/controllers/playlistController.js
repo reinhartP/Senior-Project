@@ -2,7 +2,7 @@ const request = require('request-promise-native');
 const querystring = require('querystring');
 let access_token = '';
 
-module.exports = function(token, models) {
+module.exports = async function(token, models, userId) {
     let Artist = models.artist,
         Songs = models.song,
         Playlist = models.playlist;
@@ -17,8 +17,8 @@ module.exports = function(token, models) {
         try{
             const data = await fetchPlaylists(options);     //stores returned api info in data
             const playlists = await getPlaylist(data);      //stores object with playlist info(name, id) in playlists
-            console.log(playlists);
-            const done = await loopPlaylists(playlists);    //loops through playlists to do various api calls and data parsing and adds song/artists to db
+            //console.log(playlists);
+            //const done = await loopPlaylists(playlists);    //loops through playlists to do various api calls and data parsing and adds song/artists to db
         }
         catch(err) {
             console.log(err);
@@ -100,7 +100,7 @@ module.exports = function(token, models) {
         playlists.items.forEach((playlistInfo) => {         //goes through the array of playlists
             Playlist.create(playlist = {
                 name: playlistInfo.name,
-                userId: '1'
+                userId: userId
             })
             .catch(err => console.log(err));
         })
@@ -129,6 +129,7 @@ module.exports = function(token, models) {
     }
 
     main();
+    return null;
 }
 
 

@@ -5,12 +5,8 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         userId: {
-            type: Sequelize.INTEGER,
+            type: Sequelize.STRING,
             allowNull: false,
-            references: {
-                model: 'users',
-                key: 'id'
-            }
         }
     };
     return Playlist = sequelize.define('playlist', modelDefinition);
