@@ -3,9 +3,9 @@ const bcrypt = require('bcrypt-nodejs');
 module.exports = (sequelize, Sequelize) => {
     let modelDefinition = {
         id: {
-            autoIncrement: true,
+            type: Sequelize.UUID,
+            defaultValue: Sequelize.UUIDV4,
             primaryKey:  true,
-            type: Sequelize.INTEGER,
         },
         email: {
             type: Sequelize.STRING,
