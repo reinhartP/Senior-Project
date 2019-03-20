@@ -1,38 +1,40 @@
-# LoginSpotify
 
-- Create a `.env` file in `/LoginSpotify` and add these lines to the file:
-	```
-	NODE_ENV='development'
-	CLIENT_SECRET='' //add spotify client secret
-	CLIENT_ID=''	//add spotify client id
-	```
-- Database
-	- Edit `/config/config.json` with database details
-		- development.username is mysql username
-		- development.password is mysql password
-		- development.database is database name
-- Run `npm install` to install dependencies
-- `node server.js` to run
-	- Go to `localhost:3000/`
-		- `/signin`, `/signup`, `/dashboard`, `/spotify`
+# Senior Proj
 
-# Login
+## Instructions
+- Install packages: `npm install`
+- Create a `.env` file and add these lines:
+    ```
+    PORT=''
+    NODE_ENV='development'
 
-- Can register, signin, and logout.
+    GOOGLE_CLIENT_ID=''
+    GOOGLE_CLIENT_SECRET=''
+    GOOGLE_CALLBACK_URL=''
+    SPOTIFY_CLIENT_SECRET=''
+    SPOTIFY_CLIENT_ID=''
+    SPOTIFY_CALLBACK_URL=''
 
-- Run `npm install` to install dependencies
+    YOUTUBE_API_KEY=''
 
-- Database
-	- Edit `/config/config.json` with database details
-		- development.username is mysql username
-		- development.password is mysql password
-		- development.database is database name
+    DATABASE_USERNAME=''
+    DATABASE_PASSWORD=''
+    DATABASE_NAME=''
+    DATABASE_HOST=''
+    ```
+- Launch: `node server.js`
+- Visit in your browser at `http://localhost:3000`
+- `localhost:3000/spotify/sync` to sync spotify
 
-- `node server.js` to run
-	- Some dependencies might not be installed, I might have forgetten to include them in packages.json. It will tell you what is missing so just do `npm install 'missing_dependency'`
-	- If it runs then you can go to `localhost:3000/signup`, `localhost:3000/signin`, `localhost:3000/logout`, `localhost:3000/dashboard`
+## Usage
 
-# Spotify
+- Signup with an email/password creating a local account
+- Signup with a Google account
+- Signin with either local account or Google account when an account has both
+- Link a Google account with an existing local account
+- Unlink Google account from local account
+- Link an existing local account with an existing Google account
+    - Removes the record of the existing local account and merges it into the record of the existing Google account
 
 - Currently only copies all playlist names, songs, and artists to a database
 	- Songs in the database are tied to an artist
@@ -42,15 +44,8 @@
 		- If a song has multiple artists it only adds the first
 		- etc
 
-- I have to update `package.json` to include dependencies so `npm install` doesn't do anything yet
-	- All dependencies will have to be installed manually
+## Issues
 
-- Database
-	- Edit `config.js` with database details
-		- You need at least one user so you can enter a user manually or uncomment the lines at the bottom of `/models/user.js`
-
-- Add your spotify(https://developer.spotify.com/dashboard/applications) `client_id` and `client_secret` in `index.js`
-
-- `node index.js` to run
-	- If it runs then you can go to `localhost:3000/login` and login with your spotify account
-		- It will start adding all playlist names, songs, and artists to database tables
+- Improvements need to be made on link/unlink
+    - There's no logic to check if a Google account already belongs to another local account
+    - Unlinking should maybe remove the data belonging to the Google account(id, email, name)
