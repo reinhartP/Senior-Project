@@ -20,7 +20,10 @@ module.exports = function(passport) {               // expose this function to o
 
     
     passport.deserializeUser((id, done) => {        // used to deserialize the user
-        User.findByPk(id).then(user => {
+        User.findOne({
+            where: {
+                id: id
+        }}).then(user => {
             if(user) {
                 done(null, user.get());
             }
