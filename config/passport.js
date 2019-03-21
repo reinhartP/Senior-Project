@@ -28,7 +28,7 @@ module.exports = function(passport) {               // expose this function to o
                 done(null, user.get());
             }
             else {
-                done(user.errors, null);
+                done(null, null);
             }
         });
     });
