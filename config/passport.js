@@ -66,9 +66,13 @@ module.exports = function(passport) {               // expose this function to o
                         if (!newUser) {
                             return done(null, false);
                         }
-
+                        
                         if (newUser) {
                             return done(null, newUser);
+                        }
+                    }).catch(err => {
+                        if(err.errors[0].validatorName === 'isEmail') {
+                            return done(null, false, req.flash('signupMessage', 'Invalid email'));
                         }
                     });
                 }})
