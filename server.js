@@ -27,7 +27,6 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.set('view engine', 'ejs');  //set up ejs for templating
-
 //required for passport
 app.use(session({ secret: 'sessionSecret' }));
 app.use(passport.initialize());
