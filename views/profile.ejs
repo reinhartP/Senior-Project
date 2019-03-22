@@ -3,6 +3,7 @@
 <html>
 <head>
     <title>Music Site</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <style>
@@ -71,6 +72,12 @@
                         <table>
                             <% for(let i=0; i < playlists.length; i++) { %>
                                 <tr>
+                                    <td>
+                                        <button type="button" class="close" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        
+                                    </td>
                                     <td><%= playlists[i].name %></td>
                                 </tr>
                             <% } %>
@@ -83,6 +90,14 @@
             </div>
         </div>
     </div>
+    
 </div>
 </body>
+
+<script>
+  $(".close").click(function () {
+    var name = $(this).closest("tr").find("td:eq(1)").text();
+    console.log(name);
+    });
+</script>
 </html>
