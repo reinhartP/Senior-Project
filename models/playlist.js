@@ -4,10 +4,22 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
+        spotifyId: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
         userId: {
             type: Sequelize.STRING,
             allowNull: false,
         }
     };
-    return Playlist = sequelize.define('playlist', modelDefinition);
+    let modelOptions = {
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId', 'spotifyId']
+            }
+        ]
+    };
+    return Playlist = sequelize.define('playlist', modelDefinition, modelOptions);
 };
