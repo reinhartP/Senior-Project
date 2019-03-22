@@ -47,7 +47,7 @@ module.exports = async function(token, models, userId) {
         let numLoop = Math.ceil(playlist.total / 100);              //number of times to loop through playlist, api only returns 100 items
         try {
             for(let i = 0; i < numLoop; i++) {
-                songOptions.url = playlist.id + '?' +               //change offset in url
+                songOptions.url = playlist.link + '?' +               //change offset in url
                     querystring.stringify({
                         offset: i*100,
                     }); 
@@ -80,9 +80,10 @@ module.exports = async function(token, models, userId) {
         };
         for(let i = 0; i < data.items.length; i++) {        //loops through all playlists and inserts names, etc into array
             playlists.items[i] = {};
-            playlists.items[i].name = data.items[i].name;
-            playlists.items[i].id = data.items[i].tracks.href;
-            playlists.items[i].total = data.items[i].tracks.total;
+            playlists.items[i].name     = data.items[i].name;
+            playlists.items[i].id       = data.items[i].id;
+            playlists.items[i].link     = data.items[i].tracks.href;
+            playlists.items[i].total    = data.items[i].tracks.total;
         }
         /*playlists.items.sort((a,b) => {   //sort playlists from smallest to largest
             let keyA = a.total;
@@ -100,6 +101,7 @@ module.exports = async function(token, models, userId) {
         playlists.items.forEach((playlistInfo) => {         //goes through the array of playlists
             Playlist.create(playlist = {
                 name: playlistInfo.name,
+                spotifyId: playlistInfo.id,
                 userId: userId
             })
             .catch(err => console.log(err));
