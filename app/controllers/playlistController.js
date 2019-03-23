@@ -1,3 +1,5 @@
+const Sequelize = require('sequelize');
+const op = Sequelize.Op;
 const request = require('request-promise-native');
 const querystring = require('querystring');
 let access_token = '';
@@ -5,8 +7,7 @@ let access_token = '';
 var exports = module.exports = {};
 
 exports.syncPlaylists = async function(token, models, userId) {
-    const Sequelize = require('sequelize');
-    const op = Sequelize.Op;
+    
     let Playlist = models.playlist;
     access_token = token.access_token;
     let options = {
@@ -71,8 +72,7 @@ exports.syncPlaylists = async function(token, models, userId) {
 
 exports.syncSongsArtists = function(token, models, userId, playlistName) {
     let Artist = models.artist,
-        Songs = models.song,
-        Playlist = models.playlist;
+        Songs = models.song;
     access_token = token.access_token;
     let options = {
         url: 'https://api.spotify.com/v1/playlists/',
