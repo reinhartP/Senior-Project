@@ -73,7 +73,7 @@
                             <% for(let i=0; i < playlists.length; i++) { %>
                                 <tr>
                                     <td>
-                                        <button type="button" id="syncPlaylist" class="btn btn-secondary btn-sm">Sync <%= playlists[i].name %></button>
+                                        <button type="button" id="syncPlaylist<%=i%>" class="btn btn-secondary btn-sm">Sync <%= playlists[i].name %></button>
                                     </td>
                                     <td style="visibility:hidden"><%= playlists[i].name %></td>
                                 </tr>
@@ -91,7 +91,7 @@
 </div>
 </body>
 <script>
-  $("#syncPlaylist").click(function () {
+  $('[id^="syncPlaylist"]').click(function () {
     var name = $(this).closest("tr").find("td:eq(1)").text();
     console.log(name);
     $.ajax({
