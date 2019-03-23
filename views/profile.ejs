@@ -73,12 +73,9 @@
                             <% for(let i=0; i < playlists.length; i++) { %>
                                 <tr>
                                     <td>
-                                        <button type="button" class="close" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                        
+                                        <button type="button" id="syncPlaylist" class="btn btn-secondary btn-sm">Sync <%= playlists[i].name %></button>
                                     </td>
-                                    <td><%= playlists[i].name %></td>
+                                    <td style="visibility:hidden"><%= playlists[i].name %></td>
                                 </tr>
                             <% } %>
                         </table>
@@ -93,11 +90,17 @@
     
 </div>
 </body>
-
 <script>
-  $(".close").click(function () {
+  $("#syncPlaylist").click(function () {
     var name = $(this).closest("tr").find("td:eq(1)").text();
     console.log(name);
+    $.ajax({
+        url: 'api/test',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            spotifyPlaylistName: name}),
+    })
     });
 </script>
 </html>
