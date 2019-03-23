@@ -109,7 +109,7 @@ exports.spotifyCallback = function(req, res) {
 exports.spotifyPlaylist = function(req, res) {
     async function main() { //main function that does everything
         try{
-            await PlaylistController(tokens, models, req.user.id);
+            await PlaylistController.syncPlaylists(tokens, models, req.user.id);
             await delay(100);
             redirect();
         }
@@ -126,6 +126,18 @@ exports.spotifyPlaylist = function(req, res) {
     //res.render('profile.ejs', {title: 'Spotify playlist', accessToken: tokens.access_token, refreshToken: tokens.refresh_token});
     main();
     
+}
+
+exports.spotifySyncPlaylist = function(req, res) {
+    async function main() {
+        try{
+            await PlaylistController.syncSongsArtists(tokens, models, req.user.id, req.body.spotifyPlaylistName);
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+    main();
 }
 
 exports.search = function(req, res) {
