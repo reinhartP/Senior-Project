@@ -11,6 +11,9 @@ module.exports = (sequelize, Sequelize) => {
         userId: {
             type: Sequelize.STRING,
             allowNull: false,
+        },
+        numberOfSongs: {
+            type: Sequelize.INTEGER,
         }
     };
     let modelOptions = {
