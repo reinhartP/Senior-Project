@@ -16,16 +16,16 @@ module.exports = (sequelize, Sequelize) => {
         password: {
             type: Sequelize.STRING,
         },
-        googleId: {
+        google_id: {
             type: Sequelize.STRING,
         },
-        googleToken: {
+        google_token: {
             type: Sequelize.STRING,
         },
-        googleEmail: {
+        google_email: {
             type: Sequelize.STRING,
         },
-        googleName: {
+        google_name: {
             type: Sequelize.STRING,
         },
     }

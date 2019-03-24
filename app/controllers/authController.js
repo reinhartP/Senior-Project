@@ -42,7 +42,7 @@ exports.profile = function(req, res) {
     const fetchPlaylists = async(userId) => {
         const artistId = await Playlist.findAll({
             where: {
-                userId: userId,
+                user_id: userId,
             }
         });
         return artistId;                                    //returns the row information that was found/inserted
@@ -66,7 +66,7 @@ exports.unlinkGoogle = function(req, res) {
     let user = req.user;
     User.findByPk(user.id).then(newUser => {
         newUser.update({
-            googleToken: null,
+            google_token: null,
         }).then(() => res.redirect('/profile'));
     });
 }
@@ -110,7 +110,7 @@ exports.spotifyPlaylist = function(req, res) {
     async function main() { //main function that does everything
         try{
             await PlaylistController.syncPlaylists(tokens, models, req.user.id);
-            await delay(150);
+            await delay(200);
             redirect();
         }
         catch(err) {
