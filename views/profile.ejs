@@ -48,10 +48,10 @@
                 <!-- check if the user has this token (is the user authenticated with this social account) -->
                 <% if (user.googleToken) { %>
                     <p>
-                        <strong>id</strong>: <%= user.googleId %><br>
-                        <strong>token</strong>: <%= user.googleToken %><br>
-                        <strong>email</strong>: <%= user.googleEmail %><br>
-                        <strong>name</strong>: <%= user.googleName %>
+                        <strong>id</strong>: <%= user.google_id %><br>
+                        <strong>token</strong>: <%= user.google_token %><br>
+                        <strong>email</strong>: <%= user.google_email %><br>
+                        <strong>name</strong>: <%= user.google_name %>
                     </p>
 
                     <a href="/unlink/google" class="btn btn-danger">Unlink</a>

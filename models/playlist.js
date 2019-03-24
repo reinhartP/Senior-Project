@@ -4,15 +4,15 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        spotifyId: {
+        spotify_id: {
             type: Sequelize.STRING,
             allowNull: true,
         },
-        userId: {
+        user_id: {
             type: Sequelize.STRING,
             allowNull: false,
         },
-        numberOfSongs: {
+        number_of_songs: {
             type: Sequelize.INTEGER,
         }
     };
@@ -20,7 +20,7 @@ module.exports = (sequelize, Sequelize) => {
         indexes: [
             {
                 unique: true,
-                fields: ['userId', 'spotifyId']
+                fields: ['user_id', 'spotify_id']
             }
         ]
     };

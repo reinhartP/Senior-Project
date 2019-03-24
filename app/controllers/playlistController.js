@@ -58,9 +58,9 @@ exports.syncPlaylists = async function(token, models, userId) {
         playlists.items.forEach((playlistInfo) => {         //goes through the array of playlists
             Playlist.create(playlist = {
                 name: playlistInfo.name,
-                spotifyId: playlistInfo.id,
-                userId: userId,
-                numberOfSongs: playlistInfo.total,
+                spotify_id: playlistInfo.id,
+                user_id: userId,
+                number_of_songs: playlistInfo.total,
             })
             .catch(err => console.log(err));
         })
@@ -97,14 +97,14 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
         const data = await Playlist.findOne({
             where: {
                 [op.and]: {
-                    userId: userId,
+                    user_id: userId,
                     name: playlistName,
                 }
             }
         });
         playlist = {
-            id: data.dataValues.spotifyId,
-            total: data.dataValues.numberOfSongs,
+            id: data.dataValues.spotify_id,
+            total: data.dataValues.number_of_songs,
         }
         return playlist;                                    //returns the row information that was found/inserted
     }
@@ -119,7 +119,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
         let numLoop = Math.ceil(playlist.total / 100);              //number of times to loop through playlist, api only returns 100 items
         try {
             for(let i = 0; i < numLoop; i++) {
-                songOptions.url += playlist.id + '/tracks' + '?' +               //change offset in url
+                songOptions.url = 'https://api.spotify.com/v1/playlists/' + playlist.id + '/tracks?' +               //change offset in url
                     querystring.stringify({
                         offset: i*100,
                     }); 

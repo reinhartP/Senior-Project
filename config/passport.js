@@ -156,15 +156,15 @@ module.exports = function(passport) {               // expose this function to o
                 
                 User.findOne({                                          // try to find the user based on their google id
                     where: {
-                        googleId : profile.id 
+                        google_id : profile.id 
                     }
                 }).then(user => {
                     if (user) {
-                        if(!user.googleToken) {                         //googleId is found but there is no token
+                        if(!user.google_token) {                         //googleId is found but there is no token
                             user.update({                               //update google info
-                                googleToken: token,
-                                googleName: profile.displayName,
-                                googleEmail: profile.emails[0].value,
+                                google_token: token,
+                                google_name: profile.displayName,
+                                google_email: profile.emails[0].value,
                             }).then(newUser => done(null, newUser));
                         }
                         return done(null, user);                        // if a user is found, log them in
@@ -172,10 +172,10 @@ module.exports = function(passport) {               // expose this function to o
                     else {
                         let data          = {};                         // if the user isnt in our database, create a new user
                         // set all of the relevant information
-                        data.googleId    = profile.id;
-                        data.googleToken = token;
-                        data.googleName  = profile.displayName;
-                        data.googleEmail = profile.emails[0].value;     // pull the first email
+                        data.google_dd    = profile.id;
+                        data.google_token = token;
+                        data.google_name  = profile.displayName;
+                        data.google_email = profile.emails[0].value;     // pull the first email
                         User.create(data).then(newUser => {
                             return done(null, newUser);
                         })
@@ -186,10 +186,10 @@ module.exports = function(passport) {               // expose this function to o
                 let user = req.user;
                 User.findByPk(user.id).then(newUser => {                //search id of current user
                     newUser.update({                                    //update their record to include google account info
-                        googleId:       profile.id,
-                        googleToken:    token,
-                        googleEmail:    profile.emails[0].value,
-                        googleName:     profile.displayName,
+                        google_id:       profile.id,
+                        google_token:    token,
+                        google_email:    profile.emails[0].value,
+                        google_name:     profile.displayName,
                     }).then(newUser => {
                         return done(null, newUser);
                     })
