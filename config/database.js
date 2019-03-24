@@ -13,8 +13,9 @@ const development = {
         "logging": false,
         "pool": {
             "max": 50,
-            "min": 5,
-            "acquire": 100000
+            "min": 0,
+            "idle": 10000,
+            "acquire": 10000,
         }
 };
 const test = {
