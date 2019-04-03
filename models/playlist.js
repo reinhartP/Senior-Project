@@ -7,7 +7,8 @@ module.exports = (sequelize, Sequelize) => {
         },
         name: {
             type: Sequelize.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true,
         },
         spotify_id: {
             type: Sequelize.STRING,
@@ -21,6 +22,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
         }
     };
+<<<<<<< HEAD
     let modelOptions = {
         indexes: [
             {
@@ -31,3 +33,7 @@ module.exports = (sequelize, Sequelize) => {
     };
     return Playlist = sequelize.define('playlist', modelDefinition, modelOptions);
 };
+=======
+    return Playlist = sequelize.define('playlist', modelDefinition);
+};
+>>>>>>> de7282affed0eca2d7553d4e6e3616bbea5c79ff
