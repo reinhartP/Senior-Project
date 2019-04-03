@@ -72,7 +72,9 @@ exports.syncPlaylists = async function(token, models, userId) {
 
 exports.syncSongsArtists = function(token, models, userId, playlistName) {
     let Artist = models.artist,
-        Songs = models.song;
+        Songs = models.song
+        Playlist = models.playlist,
+        PlaylistSongs = models.playlist_song;
     access_token = token.access_token;
     let options = {
         url: 'https://api.spotify.com/v1/playlists/',
@@ -83,14 +85,29 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
     async function main() { //main function that does everything
         try{
             const playlist = await fetchPlaylists();     //stores returned api info in data
-            console.log(playlist.id, playlist.total);
-            const playlists = await getPlaylistSongs(playlist);      //stores object with playlist info(name, id) in playlists
+            console.log(playlist.id, playlist.total, playlistName);
+            //get playlist database id by searching for playlist.id and userId
+            const playlistId = await getPlaylistId(playlist.id);
+            const playlists = await getPlaylistSongs(playlist, playlistId);      //stores object with playlist info(name, id) in playlists
             //console.log(playlists);
             //const done = await loopPlaylists(playlists);    //loops through playlists to do various api calls and data parsing and adds song/artists to db
         }
         catch(err) {
             console.log(err);
         }
+    }
+
+    const getPlaylistId = async(playlistId) => {
+        const data = await Playlist.findOne({
+            where: {
+                [op.and]: {
+                    spotify_id: playlistId,
+                    user_id: userId,
+                }
+            }
+        });
+
+        return id = data.dataValues.id;
     }
 
     const fetchPlaylists = async() => {
@@ -114,7 +131,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
         return data;
     }
 
-    async function getPlaylistSongs(playlist) {
+    const getPlaylistSongs = async(playlist, playlistId) => {
         songOptions = options;
         let numLoop = Math.ceil(playlist.total / 100);              //number of times to loop through playlist, api only returns 100 items
         try {
@@ -124,6 +141,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
                         offset: i*100,
                     }); 
                 const data = await fetchSongs(songOptions);         //stores returned api info in data
+                data.playlistId = playlistId;
                 const artistId = await manageSongsArtists(data);    //call function to add songs/artists to db
             }
         }
@@ -140,18 +158,36 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
             }
             addArtist(artist)                               //call function to insert artist to db
             .then(artistId => {                             //function returns row information of inserted data including UUID
-                addSong(songs, artistId[0].dataValues.id);  //call function to insert song and artistId(foreign key) to db
+                addSong(songs, artistId[0].dataValues.id, body.playlistId);  //call function to insert song and artistId(foreign key) to db
             })
             .catch(err => console.log(err));
         })
     }
-    const addSong = async(song, artistId) => {
+    async function addSong(song, artistId, playlistId) {
         //console.log(song.track.name);
-        const addSongs = await Songs.create({
-            name: song.track.name,
-            spotify: song.track.id,
-            artist_id: artistId,
+        Songs.findOrCreate({
+            where:  {
+                [op.and]: {
+                    spotify: song.track.id,
+                    artist_id: artistId,
+                }
+            },
+            defaults: {
+                name: song.track.name,
+                spotify: song.track.id,
+                artist_id: artistId,
+            }
+        }).then(songId => {
+            addPlaylistSong(songId[0].dataValues.id, playlistId);
         })
+        .catch(err => console.log(err));
+    }
+
+    const addPlaylistSong = async(songId, playlistId) => {
+        PlaylistSongs.create({
+            song_id: songId,
+            playlist_id: playlistId,
+        }).then(data => console.log(data))
         .catch(err => console.log(err));
     }
 
@@ -163,7 +199,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
             defaults: {                                     //if it doesn't exist then it adds it to the database along with the artist name
                 name: artist.name,
             },
-        });
+        }).catch(err => console.log(err));
         return artistId;                                    //returns the row information that was found/inserted
     }
 
