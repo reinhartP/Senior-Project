@@ -1,5 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
     let modelDefinition = {
+        id: {
+            type: Sequelize.UUID,
+            defaultValue: Sequelize.UUIDV4,
+            primaryKey:  true,
+        },
         name: {
             type: Sequelize.STRING,
             allowNull: false
