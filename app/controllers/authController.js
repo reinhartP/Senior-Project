@@ -110,7 +110,7 @@ exports.spotifyPlaylist = function(req, res) {
     async function main() { //main function that does everything
         try{
             await PlaylistController.syncPlaylists(tokens, models, req.user.id);
-            await delay(200);
+            await delay(500);
             redirect();
         }
         catch(err) {
