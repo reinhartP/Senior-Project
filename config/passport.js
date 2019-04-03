@@ -71,17 +71,10 @@ module.exports = function(passport) {               // expose this function to o
                             return done(null, newUser);
                         }
                     }).catch(err => {
-<<<<<<< HEAD
                         if(err.errors[0].validatorName === 'isEmail') {
                             return done(null, false, req.flash('signupMessage', 'Invalid email'));
                         }
                     });
-=======
-			if(err.errors[0].validatorName === 'isEmail') {
-				return done(null, false, req.flash('signupMessage', 'Invalid email'));
-			}
-		    });
->>>>>>> de7282affed0eca2d7553d4e6e3616bbea5c79ff
                 }})
             }
             else {                          //user is logged in, connect local account
