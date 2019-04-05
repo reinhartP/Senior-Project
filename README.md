@@ -10,7 +10,7 @@
 
 	GOOGLE_CLIENT_ID='395161992549-2fiscjq7pmbfmd6il80mnma2ca937v2m.apps.googleusercontent.com'
 	GOOGLE_CLIENT_SECRET='X7QOgc3AuRm5N0vhbF3X3bkC'
-	GOOGLE_CALLBACK_URL='http:/:3000/auth/google/callback'
+	GOOGLE_CALLBACK_URL='http://myresinaplex.ddns.net:3000/auth/google/callback'
 	SPOTIFY_CLIENT_ID='e2a3a3a51acc4e19bbe35d1d59494900'
 	SPOTIFY_CLIENT_SECRET='c95bafabf2e343efb29a0aa65958ee39'
 	SPOTIFY_CALLBACK_URL='http://myresinaplex.ddns.net:3000/spotify/callback'
@@ -21,6 +21,7 @@
 	DATABASE_PASSWORD='cppseniorproj'
 	DATABASE_NAME='spotifydb'
 	DATABASE_HOST='cppseniorproj.cpcd4bxgigxr.us-west-1.rds.amazonaws.com'
+
     ```
 - Launch: `node server.js`
 - Visit in your browser at `http://localhost:3000`
