@@ -139,7 +139,8 @@ exports.spotifyPlaylist = function(req, res) {
 exports.spotifySyncPlaylist = function(req, res) {
     async function main() {
         try{
-            await PlaylistController.syncSongsArtists(tokens, models, req.user.id, req.body.spotifyPlaylistName);
+            const access_token = await AuthController.refresh(models, req.user.id);
+            await PlaylistController.syncSongsArtists(access_token, models, req.user.id, req.body.spotifyPlaylistName);
         }
         catch(err) {
             console.log(err);
