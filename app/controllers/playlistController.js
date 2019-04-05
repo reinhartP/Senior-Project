@@ -70,12 +70,11 @@ exports.syncPlaylists = async function(token, models, userId) {
     return null;
 }
 
-exports.syncSongsArtists = function(token, models, userId, playlistName) {
+exports.syncSongsArtists = function(access_token, models, userId, playlistName) {
     let Artist = models.artist,
         Songs = models.song
         Playlist = models.playlist,
         PlaylistSongs = models.playlist_song;
-    access_token = token;
     let options = {
         url: 'https://api.spotify.com/v1/playlists/',
         headers: { 'Authorization': 'Bearer ' + access_token},
@@ -85,7 +84,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
     async function main() { //main function that does everything
         try{
             const playlist = await fetchPlaylists();     //stores returned api info in data
-            console.log(playlist.id, playlist.total, playlistName);
+            //console.log(playlist.id, playlist.total, playlistName);
             //get playlist database id by searching for playlist.id and userId
             const playlistId = await getPlaylistId(playlist.id);
             const playlists = await getPlaylistSongs(playlist, playlistId);      //stores object with playlist info(name, id) in playlists
@@ -187,7 +186,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
         PlaylistSongs.create({
             song_id: songId,
             playlist_id: playlistId,
-        }).then(data => console.log(data))
+        }).then(data => data)
         .catch(err => console.log(err));
     }
 
