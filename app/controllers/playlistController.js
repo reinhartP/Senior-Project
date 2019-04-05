@@ -9,7 +9,7 @@ var exports = module.exports = {};
 exports.syncPlaylists = async function(token, models, userId) {
     
     let Playlist = models.playlist;
-    access_token = token.access_token;
+    access_token = token;
     let options = {
         url: 'https://api.spotify.com/v1/me/playlists',
         headers: { 'Authorization': 'Bearer ' + access_token},
@@ -75,7 +75,7 @@ exports.syncSongsArtists = function(token, models, userId, playlistName) {
         Songs = models.song
         Playlist = models.playlist,
         PlaylistSongs = models.playlist_song;
-    access_token = token.access_token;
+    access_token = token;
     let options = {
         url: 'https://api.spotify.com/v1/playlists/',
         headers: { 'Authorization': 'Bearer ' + access_token},
