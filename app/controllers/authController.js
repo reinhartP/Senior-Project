@@ -100,16 +100,24 @@ exports.spotify = function(req, res) {
 }
 
 exports.spotifyCallback = function(req, res) {
-    AuthController(req.query.code, (tempTokens) => {
-        tokens = tempTokens;
-        res.redirect('/spotify/playlist');
-    });
+    async function main() {
+        try{
+            const spotifyTokens = await AuthController.authorize(req.query.code, models, req.user.id);
+            //tokens = spotifyTokens;
+            res.redirect('/spotify/playlist');
+        }
+        catch(err) {
+            console.log(err);
+        }
+    }
+    main();
 }
 
 exports.spotifyPlaylist = function(req, res) {
     async function main() { //main function that does everything
         try{
-            await PlaylistController.syncPlaylists(tokens, models, req.user.id);
+            const access_token = await AuthController.refresh(models, req.user.id);
+            await PlaylistController.syncPlaylists(access_token, models, req.user.id);
             await delay(500);
             redirect();
         }

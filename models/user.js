@@ -16,6 +16,12 @@ module.exports = (sequelize, Sequelize) => {
         password: {
             type: Sequelize.STRING,
         },
+        spotify_access: {
+            type: Sequelize.STRING,
+        },
+        spotify_refresh: {
+            type: Sequelize.STRING,
+        },
         google_id: {
             type: Sequelize.STRING,
         },
