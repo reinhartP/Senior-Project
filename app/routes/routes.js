@@ -86,6 +86,10 @@ module.exports = function(app, passport) {
     app.get('/spotify/playlist', isLoggedIn, authController.spotifyPlaylist);
 
     app.post('/api/test', authController.spotifySyncPlaylist);
+
+    app.get('/youtube', authController.youtube);
+    app.post('/youtube', authController.search);
+    app.post('/api/youtube/search', authController.search);
 };
 
 // route middleware to make sure a user is logged in
