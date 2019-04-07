@@ -4,7 +4,7 @@
 <head>
     <title>Music Site</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <style>
         body        { padding-top:80px; word-wrap:break-word; }
@@ -13,82 +13,89 @@
 <body>
 <div class="container">
 
-    <div class="page-header text-center">
+    <div class="pb-2 mt-4 mb-2 border-bottom text-center">
         <h1><span class="fa fa-anchor"></span> Profile Page</h1>
-        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        <a href="/logout" class="btn btn-danger btn-sm" role="button">Logout</a>
     </div>
 
     <div class="row">
 
         <!-- LOCAL INFORMATION -->
         <div class="col-sm-6">
-            <div class="well">
-                <h3><span class="fa fa-user"></span> Local</h3>
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <h3><span class="fa fa-user"></span> Local</h3>
 
-                <% if (user.email) { %>
-                    <p>
-                        <strong>id</strong>: <%= user.id %><br>
-                        <strong>email</strong>: <%= user.email %><br>
-                        <strong>password</strong>: <%= user.password %>
-                    </p>
+                    <% if (user.email) { %>
+                        <p>
+                            <strong>id</strong>: <%= user.id %><br>
+                            <strong>email</strong>: <%= user.email %><br>
+                            <strong>password</strong>: <%= user.password %>
+                        </p>
 
-                    <!-- <a href="/unlink/local" class="btn btn-default">Unlink</a>  -->
-                <% } 
-                else { %>
-                    <a href="/connect/local" class="btn btn-default">Connect Local</a>
-                <% } %>
-
+                        <!-- <a href="/unlink/local" class="btn btn-default">Unlink</a>  -->
+                    <% } 
+                    else { %>
+                        <a href="/connect/local" class="btn btn-secondary">Connect Local</a>
+                    <% } %>
+                </div>
             </div>
         </div>
         <!-- GOOGLE INFORMATION -->
         <div class="col-sm-6">
-            <div class="well">
-                <h3><i class="fab fa-google"></i> Google</h3>
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <h3><i class="fab fa-google"></i> Google</h3>
 
-                <!-- check if the user has this token (is the user authenticated with this social account) -->
-                <% if (user.googleToken) { %>
-                    <p>
-                        <strong>id</strong>: <%= user.google_id %><br>
-                        <strong>token</strong>: <%= user.google_token %><br>
-                        <strong>email</strong>: <%= user.google_email %><br>
-                        <strong>name</strong>: <%= user.google_name %>
-                    </p>
+                    <!-- check if the user has this token (is the user authenticated with this social account) -->
+                    <% if (user.google_token) { %>
+                        <p>
+                            <strong>id</strong>: <%= user.google_id %><br>
+                            <strong>token</strong>: <%= user.google_token %><br>
+                            <strong>email</strong>: <%= user.google_email %><br>
+                            <strong>name</strong>: <%= user.google_name %>
+                        </p>
 
-                    <a href="/unlink/google" class="btn btn-danger">Unlink</a>
-                <% } 
-                else { %>
-                    <a href="/connect/google" class="btn btn-danger">Connect Google</a>
-                <% } %>
-
+                        <a href="/unlink/google" class="btn btn-danger">Unlink</a>
+                    <% } 
+                    else { %>
+                        <a href="/connect/google" class="btn btn-primary">Connect Google</a>
+                    <% } %>
+                </div>
             </div>
         </div>
         <!-- SPOTIFY INFORMATION -->
         <div class="col-sm-6">
-            <div class="well">
-                <h3><i class="fab fa-spotify"></i> Spotify</h3>
-                <a href="/spotify/sync" class="btn btn-success">Sync Spotify</a>
-                <% if (playlists) { %>
-                    <p>
-                        <table>
-                            <% for(let i=0; i < playlists.length; i++) { %>
-                                <tr>
-                                    <td>
-                                        <button type="button" id="syncPlaylist<%=i%>" class="btn btn-secondary btn-sm">Sync <%= playlists[i].name %></button>
-                                    </td>
-                                    <td style="visibility:hidden"><%= playlists[i].name %></td>
-                                </tr>
-                            <% } %>
-                        </table>
-                    </p>
-                <% } 
-                else { %>
-                    
-                <% } %>
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <h3><i class="fab fa-spotify"></i> Spotify</h3>
+                    <a href="/spotify/sync" class="btn btn-success">Sync Spotify</a>
+                    <% if (playlists.length > 0) { %>
+                        <p>
+                            <table>
+                                <% for(let i=0; i < playlists.length; i++) { %>
+                                    <tr>
+                                        <td>
+                                            <button type="button" id="syncPlaylist<%=i%>" class="btn btn-secondary btn-sm">Sync <%= playlists[i].name %></button>
+                                        </td>
+                                        <td style="visibility:hidden"><%= playlists[i].name %></td>
+                                    </tr>
+                                <% } %>
+                            </table>
+                        </p>
+                        
+                    <% } 
+                    else { %>
+                        
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>
     
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 <script>
   $('[id^="syncPlaylist"]').click(function () {
