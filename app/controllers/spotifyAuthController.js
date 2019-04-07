@@ -67,7 +67,7 @@ exports.refresh = async function(models, userId, callback) {
         },
         json: true
     };
-
+    
     const access_token = await request(authOptions).then(body => {
         let access_token = body.access_token;
         User.update({

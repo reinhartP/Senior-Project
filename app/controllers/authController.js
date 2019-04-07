@@ -1,5 +1,6 @@
 let PlaylistController = require('../controllers/playlistController'),
-    AuthController = require('../controllers/spotifyAuthController');
+    AuthController = require('../controllers/spotifyAuthController'),
+    YoutubeController = require('../controllers/youtubeController');
 const models = require('../../models');
 const querystring = require('querystring');
 
@@ -150,5 +151,23 @@ exports.spotifySyncPlaylist = function(req, res) {
 }
 
 exports.search = function(req, res) {
-    res.render('search');
+    YoutubeController.search(req.body.search, (videoId) => {
+        console.log(videoId);
+        data = {
+            videoId: videoId
+        }
+        res.render('youtube', data);
+    });
+    //res.render('search');
+}
+
+exports.youtube = function(req, res) {
+
+    YoutubeController.default(models, (videoId) => {
+        //console.log(videoId);
+        data = {
+            videoId: videoId
+        }
+        res.render('youtube', data);
+    });
 }
