@@ -45,6 +45,11 @@
     - The page plays a random video in the top 10 trending music videos
     - The youtube search works on the backend but it doesn't update the video being played
     
+- To check the songs in a playlist for a user:
+    ```
+    localhost:3000/api/test2?email=
+    ```
+    Email defaults to `test@test.com` for testing purposes if no email is specified
 
 - To run a query for the songs in all playlists:
     ```
