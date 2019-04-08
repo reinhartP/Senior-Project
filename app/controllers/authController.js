@@ -212,6 +212,7 @@ exports.getPlaylistSongs = function(req, res) {
                 }
             )
         })
-        res.json(resObj);
+        res.header("Content-Type",'application/json');
+        res.send(JSON.stringify(resObj, null, 4));
     })
 }
