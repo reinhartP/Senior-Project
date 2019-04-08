@@ -85,11 +85,14 @@ module.exports = function(app, passport) {
 
     app.get('/spotify/playlist', isLoggedIn, authController.spotifyPlaylist);
 
-    app.post('/api/test', authController.spotifySyncPlaylist);
-
     app.get('/youtube', authController.youtube);
     app.post('/youtube', authController.search);
     app.post('/api/youtube/search', authController.search);
+
+    //test api routes
+    app.post('/api/test', authController.spotifySyncPlaylist);      //sync songs/artists of a playlist
+    app.get('/api/test2', authController.getPlaylistSongs);         //returns all of the playlists and the songs in the playlist for a user
+                                                                        //right now just returns for user test@test.com
 };
 
 // route middleware to make sure a user is logged in

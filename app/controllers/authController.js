@@ -171,3 +171,47 @@ exports.youtube = function(req, res) {
         res.render('youtube', data);
     });
 }
+
+exports.getPlaylistSongs = function(req, res) {
+    let User = models.user;
+
+    User.findOne({
+        where: {
+            email: 'test@test.com'
+        },
+        include: [
+            {
+                model: models.playlist,
+                include: [
+                    {
+                        model: models.playlist_song,
+                        include: [
+                            {
+                                model: models.song,
+                                include: [
+                                    {
+                                        model: models.artist
+                                    }
+                                ]
+                            }
+                        ],
+                        required: true,
+                    }
+                ]
+            }
+        ]
+    }).then(datas => {
+        const resObj = datas.playlists[0].playlist_songs.map(data => {
+            return Object.assign(
+                {},
+                {
+                    user: datas.email,
+                    playlist_name: datas.playlists[0].name,
+                    song_name: data.song.name,
+                    artist_name: data.song.artist.name,
+                }
+            )
+        })
+        res.json(resObj);
+    })
+}
