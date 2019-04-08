@@ -174,10 +174,10 @@ exports.youtube = function(req, res) {
 
 exports.getPlaylistSongs = function(req, res) {
     let User = models.user;
-
+    let email = req.query.email || 'test@test.com';
     User.findOne({
         where: {
-            email: 'test@test.com'
+            email: email
         },
         include: [
             {
