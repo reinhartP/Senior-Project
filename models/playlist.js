@@ -14,7 +14,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
         },
         user_id: {
-            type: Sequelize.STRING,
+            type: Sequelize.UUID,
             allowNull: false,
         },
         number_of_songs: {
