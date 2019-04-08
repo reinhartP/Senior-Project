@@ -42,6 +42,13 @@ module.exports = (sequelize, Sequelize) => {
     }
     let User = sequelize.define('user', modelDefinition, modelOptions);
 
+    User.associate = function(models) {
+        User.hasMany(models.playlist, {
+            foreignKey: 'user_id',
+            sourceKey: 'id',
+        });
+    }
+
     function hashPassword(user) {
         user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(12), null);
     };

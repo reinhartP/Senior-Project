@@ -31,5 +31,17 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true
         }
     };
-    return Songs = sequelize.define('song', modelDefinition, { charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci' })
+    let Song = sequelize.define('song', modelDefinition, { charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci' })
+
+    Song.associate = function(models) {
+        Song.hasMany(models.playlist_song, {
+            foreignKey: 'song_id',
+            sourceKey: 'id'
+        });
+        Song.belongsTo(models.artist, {
+            foreignKey: 'artist_id',
+            targetKey: 'id',
+        });
+    }
+    return Song
 }

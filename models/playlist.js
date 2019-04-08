@@ -29,5 +29,18 @@ module.exports = (sequelize, Sequelize) => {
             }
         ]
     };
-    return Playlist = sequelize.define('playlist', modelDefinition, modelOptions);
+
+    let Playlist = sequelize.define('playlist', modelDefinition, modelOptions);
+
+    Playlist.associate = function(models) {
+        Playlist.hasMany(models.playlist_song, {
+            foreignKey: 'playlist_id',
+            sourceKey: 'id',
+        });
+        Playlist.belongsTo(models.user, {
+            foreignKey: 'user_id',
+            targetKey: 'id',
+        });
+    }
+    return Playlist
 };

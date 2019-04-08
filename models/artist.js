@@ -15,5 +15,13 @@ module.exports = (sequelize, Sequelize) => {
             unique: true
         },
     };
-    return Artist = sequelize.define('artist', modelDefinition, {charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci'});
+
+    let Artist = sequelize.define('artist', modelDefinition, {charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci'});
+    Artist.associate = function(models) {
+        Artist.hasMany(models.song, {
+            foreignKey: 'artist_id',
+            sourceKey: 'id',
+        });
+    }
+    return Artist
 };
