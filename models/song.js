@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         artist_id: {
-            type: Sequelize.STRING,
+            type: Sequelize.UUID,
             allowNull: true
         },
         album_id: {
