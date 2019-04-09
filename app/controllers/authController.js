@@ -201,18 +201,22 @@ exports.getPlaylistSongs = function(req, res) {
             }
         ]
     }).then(datas => {
-        const resObj = datas.playlists[0].playlist_songs.map(data => {
-            return Object.assign(
-                {},
-                {
-                    user: datas.email,
-                    playlist_name: datas.playlists[0].name,
-                    song_name: data.song.name,
-                    artist_name: data.song.artist.name,
-                }
-            )
+        const resObj = datas.playlists.map(data => {
+            const resObj2 = data.playlist_songs.map(data2 => {
+                //console.log(data);
+                return Object.assign(
+                    {},
+                    {
+                        user: datas.email,
+                        playlist_name: data.name,
+                        song_name: data2.song.name,
+                        artist_name: data2.song.artist.name,
+                    }
+                );
+            })
+                return resObj2;
+            })
+            res.header("Content-Type",'application/json');
+            res.send(JSON.stringify(resObj, null, 4));
         })
-        res.header("Content-Type",'application/json');
-        res.send(JSON.stringify(resObj, null, 4));
-    })
 }
