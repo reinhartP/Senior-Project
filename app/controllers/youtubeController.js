@@ -6,10 +6,12 @@ const moment = require('moment');
 var exports = module.exports = {};
 
 exports.search = async function(searchString, callback) {
+    console.log(searchString);
     let options = {
         url: 'https://www.googleapis.com/youtube/v3/search?',
         qs: {
             part: 'id',
+            type: 'video',
             videoCategoryId: '10',
             maxResults: '10',
             key: process.env.YOUTUBE_API_KEY,

@@ -30,8 +30,8 @@
                 console.log(response);
         },'json');
         return false;
-    });
-    });
+        });
+        });
     </script>
     <script>
       // 2. This code loads the IFrame Player API code asynchronously.
@@ -68,12 +68,16 @@
       var done = true;
       function onPlayerStateChange(event) {
         if (event.data == YT.PlayerState.PLAYING && !done) {
-          setTimeout(stopVideo, 6000);
+          setTimeout(() => player.loadVideoById({videoId: '0n8WM3wuhxc',suggestedQuality: 'large',}), 6000);
           done = true;
         }
+
       }
       function stopVideo() {
-        player.stopVideo();
+        player.loadVideoById({
+            videoId: 'B1yA0XcJi3U',
+            suggestedQuality: 'large',
+        });
       }
     </script>
     
