@@ -7,10 +7,28 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <style>
-        body        { padding-top:80px; word-wrap:break-word; }
+        body        { padding-top:0px; word-wrap:break-word; }
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Temporary Navbar</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/youtube">Youtube <span class="sr-only">(current)</span></a>
+                </li>
+                </ul>
+                <form class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" id="searchEmail" name="email" placeholder="Enter an email">
+                        <button type="button" id="searchButton" class="btn btn-outline-success my-2 my-sm-0">Search</button>
+                        </form>
+            </div>
+        </nav>    
 <div class="container">
 
     <div class="pb-2 mt-4 mb-2 border-bottom text-center">
@@ -91,6 +109,14 @@
                 </div>
             </div>
         </div>
+        <div class="col-sm-6">
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <h3><i class="fa fa-music"></i> Songs</h3>
+                    <pre class="message box"></pre>
+                </div>
+            </div>
+        </div>    
     </div>
     
 </div>
@@ -109,5 +135,16 @@
             spotifyPlaylistName: name}),
     })
     });
+    $('[id^="searchButton"').click(function() {
+        let text = document.getElementById("searchEmail").value;
+        let user = text || "<%=user.email%>";
+        req = new XMLHttpRequest();
+        req.open("GET", 'api/test2?email=' + user, true);
+        req.send();
+        req.onload=function(){
+            json=JSON.parse(req.responseText);
+            document.getElementsByClassName('message')[0].innerHTML=JSON.stringify(json, null, 4);
+        }
+    })
 </script>
 </html>
