@@ -150,26 +150,18 @@ exports.spotifySyncPlaylist = function(req, res) {
     main();
 }
 
-exports.search = function(req, res) {
-    YoutubeController.search(req.body.search, (videoId) => {
-        console.log(videoId);
-        data = {
-            videoId: videoId
-        }
-        res.render('youtube', data);
-    });
+exports.search = async function(req, res) {
+    const videoId = await YoutubeController.search(req.body.search);
+    console.log(videoId);
     //res.render('search');
 }
 
-exports.youtube = function(req, res) {
-
-    YoutubeController.default(models, (videoId) => {
-        //console.log(videoId);
-        data = {
-            videoId: videoId
-        }
-        res.render('youtube', data);
-    });
+exports.youtube = async function(req, res) {
+    const videoId = await YoutubeController.default(models);
+    data = {
+        videoId: videoId,
+    }
+    res.render('youtube', data);
 }
 
 exports.getPlaylistSongs = function(req, res) {

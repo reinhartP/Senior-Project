@@ -5,7 +5,7 @@ const moment = require('moment');
 
 var exports = module.exports = {};
 
-exports.search = async function(searchString, callback) {
+exports.search = async function(searchString) {
     console.log(searchString);
     let options = {
         url: 'https://www.googleapis.com/youtube/v3/search?',
@@ -22,9 +22,7 @@ exports.search = async function(searchString, callback) {
 
     async function main() {
         try{
-            const data = await fetchResult(options);
-            callback(data.items[0].id)
-            //callback('2S24-y0Ij3Y')
+            return await fetchResult(options);
             }
         catch(err) {
             console.log(err);
@@ -35,10 +33,11 @@ exports.search = async function(searchString, callback) {
         const data = await request.get(options).catch(err => console.log(err));
         return data;
     }
-    main();
+
+    return await main().then(value => value.items[0].id.videoId);
 };
 
-exports.default = async function(models, callback) {
+exports.default = async function(models) {
     let TopSong = models.top_song;
     let options = {
         url: 'https://www.googleapis.com/youtube/v3/videos?',
@@ -74,7 +73,7 @@ exports.default = async function(models, callback) {
                 }
             }
             let rand = Math.floor(Math.random()*videos.items.length);
-            callback(videos.items[rand].id)
+            return videos.items[rand].id;
             }
         catch(err) {
             console.log(err);
@@ -133,5 +132,5 @@ exports.default = async function(models, callback) {
         return data;
     }
     
-    main();
+    return await main().then(videoId => videoId);
 };
