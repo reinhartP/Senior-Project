@@ -58,17 +58,16 @@ exports.default = async function(models, callback) {
             videos = {
                 "items": []
             };
-            if(!query) {
-                
+            if(!query) {    //table needs to be updated because older then a day or empty
                 const data = await fetchTopSongs(options);
-                
+
                 for(let i = 0; i < data.items.length; i++) {
                     videos.items[i] = {};
                     videos.items[i].id = data.items[i].id;
                 }
                 await addVideos(videos);
             }
-            else {
+            else {          //table is less then 1 day old
                 for(let i = 0; i < query.length; i++) {
                     videos.items[i] = {};
                     videos.items[i].id = query[i].dataValues.youtube_id;
@@ -88,35 +87,45 @@ exports.default = async function(models, callback) {
                 id: {[op.like]: '%'}
             }
         }).then(data => {
-            let lastUpdated = moment(data[0].dataValues.updatedAt).fromNow();
-            if(lastUpdated.includes('day')) {
+            if(data[0]) {                               //check time if items are in table
+                let lastUpdated = moment(data[0].dataValues.updatedAt).fromNow();
+                if(lastUpdated.includes('day')) {       //time since last update > 1 day
+                    return false;
+                }
+                else {                                  //less then 1 day return what's in the table
+                    return data;
+                }
+            }
+            else {                                      //table is empty
                 return false;
             }
-            else {
-                return data;
-            }
         })
-
         return data;
     }
 
     const addVideos = async(videos) => {
         for(let i = 0; i < videos.items.length; i++) {
-            TopSong.update({
-                youtube_id: videos.items[i].id,
-            }, {
+            TopSong.findOne({
                 where: {
                     id: i+1,
                 }
-            });
-        }
-
-        /*videos.items.forEach((videoId) => {         //creates initial 10 entries
-            TopSong.create({
-                youtube_id: videoId.id,
+            }).then(foundItem => {
+                if(!foundItem) {    //item not found
+                    TopSong.create({
+                        youtube_id: videos.items[i].id,
+                    })
+                }
+                else {              //found item, update it
+                    TopSong.update({
+                        youtube_id: videos.items[i].id,
+                    }, {
+                        where: {
+                            id: i+1,
+                        }
+                    })
+                }
             })
-            .catch(err => console.log(err));
-        })*/
+        }
     }
 
     const fetchTopSongs = async(options) => {
