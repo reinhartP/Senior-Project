@@ -151,8 +151,14 @@ exports.spotifySyncPlaylist = function(req, res) {
 }
 
 exports.search = async function(req, res) {
-    const videoId = await YoutubeController.search(req.body.search);
+    const videoId = await YoutubeController.search(req.query.search);
+    data = {
+        videoId: videoId,
+    }
+    
     console.log(videoId);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(data, null, 4));
     //res.render('search');
 }
 
