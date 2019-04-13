@@ -90,6 +90,7 @@ module.exports = function(app, passport) {
     app.post('/api/youtube/search', authController.search);
 
     //test api routes
+    app.get('/api/youtube/search', authController.search);
     app.post('/api/test', authController.spotifySyncPlaylist);      //sync songs/artists of a playlist
     app.get('/api/test2', authController.getPlaylistSongs);         //returns all of the playlists and the songs in the playlist for a user
                                                                         //right now just returns for user test@test.com

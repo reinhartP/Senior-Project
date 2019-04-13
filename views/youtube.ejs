@@ -11,33 +11,21 @@
     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
     <div class="d-flex justify-content-center">
         <div class="p-4">
-            <form>
-                <div class="form-group">
-                    <input type="text" class="form-control" name="search" placeholder="Search for a song">
-                </div>
-                <button type="submit" id="submit" class="btn btn-dark btn=lg">Search</button>
+            <form class="form-inline my-2 my-lg-0">
+              <input class="form-control mr-sm-2" type="form" id="searchYoutube" name="search" placeholder="Search for a song">
+              <button type="button" id="searchButton" class="btn btn-outline-success my-2 my-sm-0">Search</button>
             </form>
         </div>
         
         <div class="p-4" id="player"></div>
     </div>
 
-    <script>
-        $(document).ready(function(){
-        var $form = $('form');
-        $form.submit(function(){
-        $.post($(this).attr('action'), $(this).serialize(), function(response){
-                console.log(response);
-        },'json');
-        return false;
-        });
-        });
-    </script>
+    
     <script>
       // 2. This code loads the IFrame Player API code asynchronously.
       var tag = document.createElement('script');
 
-      tag.src = "https://www.youtube.com/iframe_api";
+      tag.src = "http://www.youtube.com/iframe_api";
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
@@ -80,6 +68,25 @@
         });
       }
     </script>
+    <script>
+      $('[id^="searchButton"').click(function() {
+      let text = document.getElementById("searchYoutube").value;
+      let search = text;
+      var searchResult;
+      $.ajax({
+    url: 'api/youtube/search',
+    data: {
+      search: search,
+    },
+    success: (data) => {
+      player.loadVideoById({videoId: data.videoId});
+      searchResult=data.videoId;
+    },
+    dataType: 'json'
+    });
+})
+  
     
+</script>
   </body>
 </html>
