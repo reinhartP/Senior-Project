@@ -14,8 +14,15 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false,
         },
     };
-
-    let PlaylistSong = sequelize.define('playlist_song', modelDefinition);
+    let modelOptions = {
+        indexes: [
+            {
+                unique: true,
+                fields: ['playlist_id', 'song_id']
+            }
+        ]
+    };
+    let PlaylistSong = sequelize.define('playlist_song', modelDefinition, modelOptions);
 
     PlaylistSong.associate = function(models) {
         PlaylistSong.belongsTo(models.song, {
