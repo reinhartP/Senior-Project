@@ -6,8 +6,6 @@ const querystring = require('querystring');
 
 var exports = module.exports = {}
 
-let tokens = {};
-
 exports.signup = function(req, res) {
     res.render('signup.ejs', { message: req.flash('signupMessage') });
 }
@@ -156,10 +154,8 @@ exports.search = async function(req, res) {
         videoId: videoId,
     }
     
-    console.log(videoId);
     res.header("Content-Type",'application/json');
     res.send(JSON.stringify(data, null, 4));
-    //res.render('search');
 }
 
 exports.youtube = async function(req, res) {
@@ -201,7 +197,6 @@ exports.getPlaylistSongs = function(req, res) {
     }).then(datas => {
         const resObj = datas.playlists.map(data => {
             const resObj2 = data.playlist_songs.map(data2 => {
-                //console.log(data);
                 return Object.assign(
                     {},
                     {
