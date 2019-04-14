@@ -18,7 +18,7 @@ const development = {
             "max": 50,
             "min": 0,
             "idle": 10000,
-            "acquire": 10000,
+            "acquire": 50000,
         }
 };
 const test = {
