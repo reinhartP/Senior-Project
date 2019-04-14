@@ -6,7 +6,6 @@ const moment = require('moment');
 var exports = module.exports = {};
 
 exports.search = async function(searchString) {
-    console.log(searchString);
     let options = {
         url: 'https://www.googleapis.com/youtube/v3/search?',
         qs: {
@@ -22,7 +21,7 @@ exports.search = async function(searchString) {
 
     async function main() {
         try{
-            return await fetchResult(options);
+            return await fetchResult(options);  //return search results from youtube api
             }
         catch(err) {
             console.log(err);
@@ -33,8 +32,9 @@ exports.search = async function(searchString) {
         const data = await request.get(options).catch(err => console.log(err));
         return data;
     }
-
-    return await main().then(value => value.items[0].id.videoId);
+    return await main().then(value => {     //return first result from youtube api
+        return value.items[0].id.videoId
+    });   
 };
 
 exports.default = async function(models) {
