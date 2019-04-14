@@ -86,8 +86,6 @@ module.exports = function(app, passport) {
     app.get('/spotify/playlist', isLoggedIn, authController.spotifyPlaylist);
 
     app.get('/youtube', authController.youtube);
-    app.post('/youtube', authController.search);
-    app.post('/api/youtube/search', authController.search);
 
     //test api routes
     app.get('/api/youtube/search', authController.search);
