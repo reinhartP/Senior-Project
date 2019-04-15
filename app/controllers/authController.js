@@ -1,6 +1,7 @@
 let PlaylistController = require('../controllers/playlistController'),
     AuthController = require('../controllers/spotifyAuthController'),
     YoutubeController = require('../controllers/youtubeController');
+
 const models = require('../../models');
 const querystring = require('querystring');
 
@@ -212,4 +213,25 @@ exports.getPlaylistSongs = function(req, res) {
             res.header("Content-Type",'application/json');
             res.send(JSON.stringify(resObj, null, 4));
         })
+}
+const Sequelize = require('sequelize');
+const op = Sequelize.Op;
+exports.realtimeSearch = function(req, res) {
+    let Song = models.song;
+    Song.findAll({
+        where: {
+            name: {[op.like]: '%'+req.query.key+'%'},
+        },
+        include: [
+            {
+                model: models.artist,
+            }
+        ]
+    }).then(data => {
+        let results = [];
+        data.forEach(value => {
+            results.push(value.dataValues.name + ' - ' + value.dataValues.artist.dataValues.name);
+        })
+        res.end(JSON.stringify(results));
+    })
 }
