@@ -1,6 +1,8 @@
 
 # Senior Proj
 
+Demo at http://myresinaplex.ddns.net:3000
+
 ## Instructions
 - Install packages: `npm install`
 - Create a `.env` file and add these lines:
@@ -27,11 +29,6 @@
 
 ## Usage
 
-- To run a query for the songs in all playlists:
-    ```
-    SELECT songs.name "Song", artists.name "Artist", playlists.name "Playlist", users.email "User" FROM songs LEFT JOIN artists ON songs.artist_id = artists.id LEFT JOIN playlist_songs ON songs.id = playlist_songs.song_id LEFT JOIN playlists ON playlist_songs.playlist_id = playlists.id LEFT JOIN users ON playlists.user_id = users.id WHERE playlists.name IS NOT NULL;
-    ```
-    - Can add `AND playlists.name = "{playlist name}"` to search for a specific playlist or `AND users.email = "{user email}"` to search for a certain user's songs
 - Signup with an email/password creating a local account
 - Signup with a Google account
 - Signin with either local account or Google account when an account has both
@@ -48,13 +45,15 @@
 
 - `/youtube` has a youtube search form and an embedded youtube video
     - The page plays a random video in the top 10 trending music videos
-    - The youtube search works on the backend but it doesn't update the video being played
+    - Searching for a song instantly changes the current video
+        - Real time suggestions by querying our database
+            - Can only give suggestion if the song is in the database but you can still search for a song even if it doesn't give a suggestion
     
 - To check the songs in a playlist for a user:
-    ```
-    localhost:3000/api/test2?email=
-    ```
-    Email defaults to `test@test.com` for testing purposes if no email is specified
+    - Use the search bar at the top of the profiles page
+        - Searching with no email entered displays the current users songs
+        - If nothing appears after a few seconds then either that email doesn't exist or that user has no songs synced
+            - You have to refresh or reopen the page since this causes the server to hang
 
 - To run a query for the songs in all playlists:
     ```
@@ -65,7 +64,9 @@
 ## Issues
 
 - If a song has multiple artists it only syncs the first one
-- Can't update the youtube video that is currently being played
+- Add protections when searching for a user's playlists/songs
+    - User doesn't exist or user doesn't have anything synced
+        - Server currently hangs when these conditions are met requiring page refresh or close/open tab
 - Youtube api limits are pretty restrictive
     - Daily quota is 10,000 requests
         - A search counts as 100 requests
