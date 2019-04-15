@@ -2,7 +2,9 @@
 <html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="js/typeahead.bundle.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/typeahead.css" />
     <style type="text/css">
         body {background: #202124 !important;}
     </style>
@@ -10,9 +12,9 @@
   <body>
     <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
     <div class="d-flex justify-content-center">
-        <div class="p-4">
+        <div class="p-4" id="remote">
             <form id="searchForm" class="form-inline my-2 my-lg-0">
-              <input class="form-control mr-sm-2" type="text" id="searchYoutube" name="search" placeholder="Search for a song">
+              <input class="form-control typeahead mr-sm-2  tt-query" type="text" id="searchYoutube" name="search" placeholder="Search for a song" autocomplete="off">
               <button type="button" id="searchButton" class="btn btn-dark btn=lg">Search</button>
             </form>
         </div>
@@ -49,6 +51,26 @@
         event.target.setVolume(25);
         event.target.playVideo();
       }
+    </script>
+    <script>
+        $(document).ready(function() {
+          let songs = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.whitespace,
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                url: 'http://localhost:3000/api/search?key=%QUERY',
+                wildcard: '%QUERY'
+            }
+        });
+        $('#remote .form-control').typeahead({
+            hint: true,
+            highlight: true,
+            minLength: 3,
+        }, {
+            name: 'songs',
+            source: songs,
+        })
+        });
     </script>
     <script>
     document.getElementById('searchYoutube').onkeypress = function(e) {
