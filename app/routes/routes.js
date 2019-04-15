@@ -88,6 +88,7 @@ module.exports = function(app, passport) {
     app.get('/youtube', authController.youtube);
 
     //test api routes
+    app.get('/api/search', authController.realtimeSearch);
     app.get('/api/youtube/search', authController.search);
     app.post('/api/test', authController.spotifySyncPlaylist);      //sync songs/artists of a playlist
     app.get('/api/test2', authController.getPlaylistSongs);         //returns all of the playlists and the songs in the playlist for a user
