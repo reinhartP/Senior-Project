@@ -53,24 +53,30 @@
       }
     </script>
     <script>
-        $(document).ready(function() {
-          let songs = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.whitespace,
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            remote: {
-                url: '/api/search?key=%QUERY',
-                wildcard: '%QUERY'
-            }
+      $(document).ready(function() {
+        let songs = new Bloodhound({
+          datumTokenizer: Bloodhound.tokenizers.whitespace,
+          queryTokenizer: Bloodhound.tokenizers.whitespace,
+          remote: {
+              url: '/api/search?key=%QUERY',
+              wildcard: '%QUERY'
+          }
         });
+
         $('#remote .form-control').typeahead({
-            hint: true,
-            highlight: true,
-            minLength: 3,
-        }, {
-            name: 'songs',
-            source: songs,
+          hint: true,
+          highlight: true,
+          minLength: 1,
+        }, 
+        {
+          name: 'songs',
+          display: function(data) {
+              return data.song_name + ' - ' + data.artist_name;
+          },
+          limit: 20,
+          source: songs,
         })
-        });
+      });
     </script>
     <script>
     document.getElementById('searchYoutube').onkeypress = function(e) {

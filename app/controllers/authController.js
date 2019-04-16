@@ -1,3 +1,5 @@
+const sort = require('match-sorter');
+
 let PlaylistController = require('../controllers/playlistController'),
     AuthController = require('../controllers/spotifyAuthController'),
     YoutubeController = require('../controllers/youtubeController');
@@ -214,24 +216,40 @@ exports.getPlaylistSongs = function(req, res) {
             res.send(JSON.stringify(resObj, null, 4));
         })
 }
+
 const Sequelize = require('sequelize');
 const op = Sequelize.Op;
 exports.realtimeSearch = function(req, res) {
     let Song = models.song;
-    Song.findAll({
-        where: {
-            name: {[op.like]: '%'+req.query.key+'%'},
-        },
+    Song.findAll({                                  
+        raw: true,
         include: [
             {
                 model: models.artist,
+                as: 'artist',
+                where: {
+                    [op.or]: {              //returns rows that contain the query key
+                        name: {             //matches song name or artist name
+                            [op.like]: '%'+req.query.key+'%',
+                        },
+                        '$song.name$': {
+                            [op.like]: '%'+req.query.key+'%',
+                        }
+                    }
+                }
             }
         ]
     }).then(data => {
         let results = [];
-        data.forEach(value => {
-            results.push(value.dataValues.name + ' - ' + value.dataValues.artist.dataValues.name);
-        })
-        res.end(JSON.stringify(results));
+        data.forEach(value => {             
+            results.push({                  //push object containing song_name and artist_name to results array
+                song_name: value.name,
+                artist_name: value['artist.name']
+            });
+        })          
+                                            //sort result so better matches are at the beginning of array
+        let sortedResults = sort(results, req.query.key, {
+            keys: ['song_name', 'artist_name']});
+        res.end(JSON.stringify(sortedResults));
     })
 }
