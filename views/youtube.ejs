@@ -63,7 +63,7 @@
           }
         });
 
-        $('#remote .form-control').typeahead({
+        var th = $('#remote .form-control').typeahead({
           hint: true,
           highlight: true,
           minLength: 1,
@@ -73,12 +73,18 @@
           display: function(data) {
               return data.song_name + ' - ' + data.artist_name;
           },
-          limit: 20,
+          limit: Infinity,  //limit is controlled by the backend
           source: songs,
+        }).on('typeahead:selected', function(e, data) {
+          submitSearch();
+          th.typeahead('val','');
         })
       });
     </script>
     <script>
+    $(function(){
+      $(document).on('click','input[type=text]',function(){ this.select(); });
+    });
     document.getElementById('searchYoutube').onkeypress = function(e) {
       if(!e) e = window.event;
       var keyCode = e.keyCode || e.which;
@@ -88,9 +94,8 @@
       }
     }
     document.getElementById('searchButton').onclick = function() {
-      submitSearch()
+      submitSearch();
     };
-
     function submitSearch() {
       let text = document.getElementById("searchYoutube").value;
       let search = text;
@@ -102,7 +107,7 @@
           player.loadVideoById({
             videoId: json.videoId,
             suggestedQuality: 'hd720',
-          })
+          });
       }
     }
     </script>
