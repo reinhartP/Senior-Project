@@ -3,7 +3,7 @@ const sort = require('match-sorter');
 let PlaylistController = require('../controllers/playlistController'),
     AuthController = require('../controllers/spotifyAuthController'),
     YoutubeController = require('../controllers/youtubeController');
-
+    //LastFmController = require('../controllers/lastFmController');
 const models = require('../../models');
 const querystring = require('querystring');
 
@@ -219,6 +219,7 @@ exports.getPlaylistSongs = function(req, res) {
 
 const Sequelize = require('sequelize');
 const op = Sequelize.Op;
+
 exports.realtimeSearch = function(req, res) {
     let Song = models.song;
     Song.findAll({                                  
@@ -250,6 +251,18 @@ exports.realtimeSearch = function(req, res) {
                                             //sort result so better matches are at the beginning of array
         let sortedResults = sort(results, req.query.key, {
             keys: ['song_name', 'artist_name']});
-        res.end(JSON.stringify(sortedResults));
+        if(sortedResults.length > 10) {
+            res.end(JSON.stringify(sortedResults.slice(0,10)));
+        }
+        else {
+            res.end(JSON.stringify(sortedResults));
+        }
     })
+}
+
+exports.lastfm = async function(req, res) {
+    console.log(req.query.page);
+    const data = await LastFmController.scrapeTrackInfo(models, req.query.page);
+    res.header("Content-Type",'application/json');
+    res.send(JSON.stringify(data, null, 4));
 }
