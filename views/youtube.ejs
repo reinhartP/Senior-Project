@@ -10,31 +10,57 @@
     </style>
 </head>
   <body>
-    <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+      
     <div class="d-flex justify-content-center">
-        <div class="p-4" id="remote">
-            <form id="searchForm" class="form-inline my-2 my-lg-0">
-              <input class="form-control typeahead mr-sm-2  tt-query" type="text" id="searchYoutube" name="search" placeholder="Search for a song" autocomplete="off">
-              <button type="button" id="searchButton" class="btn btn-dark btn=lg">Search</button>
+        <div class="p-2" id="remote">
+            <form id="searchForm" class="form-inline">
+              <input class="form-control typeahead tt-query" type="text" id="searchYoutube" name="search" placeholder="Search for a song" autocomplete="off">
             </form>
         </div>
+        <div class="p-2" id="remoteButton">
+            <button type="button" id="searchButton" class="btn btn-dark btn-md">Add to queue</button>
+        </div>
         
-        <div class="p-4" id="player"></div>
+    </div>  
+    
+    <div class="container" style="max-width: 1280px;">
+      <div class="row justify-content-center">
+        <div class="col" id="videoQueue">
+          
+        </div>
+        <div class="col-xl-14" id="player"></div><br>
+        <div class="w-100"></div>
+        <div class="alert alert-success ml-auto" id="success-alert" style="display: none">
+            <button type="button" class="close mr-auto" data-dismiss="alert"></button>
+            <strong>Success! </strong>
+            Song added to queue
+        </div> 
+        <button type="button" id="nextButton" class="btn btn-success btn-md ml-auto mb-auto">Next Song</button>
+        
+      </div>
     </div>
-
+    <div class="container">
+      <div class="row align-items-end">
+        <div class="alert alert-success" id="success-alert" style="display: none">
+            <button type="button" class="close" data-dismiss="alert">x</button>
+            <strong>Success! </strong>
+            Added to queue
+        </div> 
+      </div>
+    </div>
+        
     
     <script>
-      // 2. This code loads the IFrame Player API code asynchronously.
+      
       var tag = document.createElement('script');
-
       tag.src = "https://www.youtube.com/iframe_api";
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-      // 3. This function creates an <iframe> (and YouTube player)
-      //    after the API code downloads.
       var player;
       var videoId = "<%=data.videoId%>";
+      var queue = [];
+
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
           height: '720',
@@ -42,18 +68,37 @@
           videoId: videoId,
           events: {
             'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
           }
         });
       }
 
-      // 4. The API will call this function when the video player is ready.
+      function onPlayerStateChange(event) { 
+        if(event.data === YT.PlayerState.ENDED) {
+          if(queue.length === 0) {
+            player.seekTo(0, true); //restarts the current video if no songs in queue
+          }
+          else {
+            videoId = queue.shift() //removes queueArr[0] from array and returns it's value
+            updateVideo(videoId);
+          }
+        }
+      }
+
       function onPlayerReady(event) {
         event.target.setVolume(25);
         event.target.playVideo();
       }
-    </script>
-    <script>
+
+      function updateVideo(videoId) {
+        player.loadVideoById({
+            videoId: videoId,
+            suggestedQuality: 'hd720',
+          });
+      }
+
       $(document).ready(function() {
+        
         let songs = new Bloodhound({
           datumTokenizer: Bloodhound.tokenizers.whitespace,
           queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -76,12 +121,11 @@
           limit: Infinity,  //limit is controlled by the backend
           source: songs,
         }).on('typeahead:selected', function(e, data) {
-          submitSearch();
-          th.typeahead('val','');
+          submitSearch(data.youtube_id);
+          th.typeahead('val',''); //resets the form to empty string
         })
       });
-    </script>
-    <script>
+
     $(function(){
       $(document).on('click','input[type=text]',function(){ this.select(); });
     });
@@ -89,27 +133,38 @@
       if(!e) e = window.event;
       var keyCode = e.keyCode || e.which;
       if(keyCode == '13') {
-        submitSearch();
+        submitSearch(null);
         return false;
       }
     }
     document.getElementById('searchButton').onclick = function() {
-      submitSearch();
+      submitSearch(null);
     };
-    function submitSearch() {
+
+    document.getElementById('nextButton').onclick = function() {
+      onPlayerStateChange({data: YT.PlayerState.ENDED});
+    };
+
+    function submitSearch(videoId) {
+      $("#success-alert").css("display", "block").fadeTo(2000, 500).slideUp(500, function(){
+      $("#success-alert").slideUp(500);
+      });   
       let text = document.getElementById("searchYoutube").value;
       let search = text;
-      req = new XMLHttpRequest();
-      req.open("GET", 'api/youtube/search?search=' + search, true);
-      req.send();
-      req.onload=function(){
-          json=JSON.parse(req.responseText);
-          player.loadVideoById({
-            videoId: json.videoId,
-            suggestedQuality: 'hd720',
-          });
+      if(!videoId) {
+        req = new XMLHttpRequest();
+        req.open("GET", 'api/youtube/search?search=' + search, true);
+        req.send();
+        req.onload=function(){
+            json=JSON.parse(req.responseText);
+            queue.push(json.videoId);
+        }
+      }
+      else {
+        queue.push(videoId);
       }
     }
+    
     </script>
   </body>
 </html>
