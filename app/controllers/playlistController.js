@@ -42,19 +42,16 @@ exports.syncPlaylists = async function(token, models, userId) {
             playlists.items[i].link     = data.items[i].tracks.href;
             playlists.items[i].total    = data.items[i].tracks.total;
         }
-        /*playlists.items.sort((a,b) => {   //sort playlists from smallest to largest
-            let keyA = a.total;
-            let keyB = b.total;
-            if(keyA < keyB)
-                return -1;
-            if(keyA > keyB)
-                return 1;
-        });*/
         addPlaylist(playlists);                              //adds playlists to db
         return playlists;
     }
 
     const addPlaylist = async(playlists) => {
+        await Playlist.destroy({
+            where: {
+                user_id: userId,
+            }
+        })
         playlists.items.forEach((playlistInfo) => {         //goes through the array of playlists
             Playlist.create(playlist = {
                 name: playlistInfo.name,
@@ -132,7 +129,10 @@ exports.syncSongsArtists = function(access_token, models, userId, playlistName) 
 
     const getPlaylistSongs = async(playlist, playlistId) => {
         songOptions = options;
-        let numLoop = Math.ceil(playlist.total / 100);              //number of times to loop through playlist, api only returns 100 items
+        let numLoop;
+        playlist.total > 300 
+            ? numLoop = 2       //allow for a max of 300 songs per playlist
+            : numLoop = Math.ceil(playlist.total / 100);
         try {
             for(let i = 0; i < numLoop; i++) {
                 songOptions.url = 'https://api.spotify.com/v1/playlists/' + playlist.id + '/tracks?' +               //change offset in url
