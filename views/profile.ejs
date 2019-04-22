@@ -12,7 +12,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Temporary Navbar</a>
+            <a class="navbar-brand" href="#">Music Site</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -112,8 +112,11 @@
         <div class="col-sm-6">
             <div class="card bg-light mb-3">
                 <div class="card-body">
-                    <h3><i class="fa fa-music"></i> Songs</h3>
-                    <pre class="message box"></pre>
+                    <h3><i class="fa fa-music"></i> Playlists</h3>
+                    
+                    <div id="accordion" style="display: none;">
+
+                    </div>
                 </div>
             </div>
         </div>    
@@ -139,11 +142,43 @@
         let text = document.getElementById("searchEmail").value;
         let user = text || "<%=user.email%>";
         req = new XMLHttpRequest();
-        req.open("GET", 'api/test2?email=' + user, true);
+        req.open("GET", 'api/user/playlists?email=' + user, true);
         req.send();
         req.onload=function(){
             json=JSON.parse(req.responseText);
-            document.getElementsByClassName('message')[0].innerHTML=JSON.stringify(json, null, 4);
+            if(Object.keys(json).length > 0) {
+                $("#accordion").css("display", "block")
+                $("#accordion").empty();
+                json.map((data, index) => {
+                    var container = $('<div class="card"></>')
+                    container.append('<div class="card-header" id="heading'+index+'">'+'<h5 class="mb-0">'+'<button class="btn btn-outline-dark" data-toggle="collapse" data-target="#collapse'+index+'" aria-expanded="true" aria-controls="collapseOne">'+data[0].playlist_name+' ('+data.length+' songs)')
+                    container.append('<div id="collapse'+index+'" class="collapse collapsed" aria-labelledby="headingOne" data-parent="#accordion">'+'<div class="card-body">'+'<ul id="playlist'+index+'Songs">');
+                    $("#accordion").append(container);
+
+                    let songs = {};
+                    data.forEach((obj, i) => {  //adds songs with formatting "Song - Artist" to songs object
+                        songs["Song"+i] = obj.song_name+' - '+obj.artist_name;
+                    })
+
+                    var songList = $('#playlist'+index+'Songs')
+                    $.each(songs, function(i)   //creates list of songs
+                    {
+                        var li = $('<li/>')
+                            .addClass('ui-menu-item')
+                            .attr('role', 'menuitem')
+                            .appendTo(songList);
+                        var aaa = $('<a/>')
+                            .addClass('ui-all')
+                            .text(songs[i])
+                            .appendTo(li);
+                    });
+                })
+            }
+            else {
+                $("#accordion").css("display", "block")
+                $("#accordion").empty();
+                $("#accordion").append('<p>No user found</p');
+            }
         }
     })
 </script>
