@@ -1,7 +1,7 @@
 
 # Senior Proj
 
-Demo at http://myresinaplex.ddns.net:3000
+Demo at http://myresinaplex.ddns.net
 
 ## Instructions
 - Install packages: `npm install`
@@ -50,8 +50,9 @@ Demo at http://myresinaplex.ddns.net:3000
 ### Youtube features
 ------
 - `/youtube` has a youtube search form and an embedded youtube video
-    - The page by defaultplays a random video in the top 10 trending music videos
-    - Searching for a song instantly changes the current video
+    - The page by default plays a random video in the top 10 trending music videos
+    - Searching for a song adds it to a queue
+        - Video changes when song ends or when next song button is pressed
         - Real time suggestions by querying our database
             - Can only give suggestion if the song is in the database but you can still search for a song even if it doesn't give a suggestion
             - Clicking a suggestion auto submits the form and plays the video
@@ -81,6 +82,7 @@ Demo at http://myresinaplex.ddns.net:3000
         - A search counts as 100 requests
         - Getting the trending videos counts as 1 request, this is at most done once a day since it's stored in the database
     - need to store the youtube video id so we don't have to repeat searches
+- Pressing enter or add to queue button on the youtube page should clear the form
 - Improvements need to be made on link/unlink
     - There's no logic to check if a Google account already belongs to another local account
     - Unlinking should maybe remove the data belonging to the Google account(id, email, name)
