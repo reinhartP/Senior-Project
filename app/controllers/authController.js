@@ -82,7 +82,6 @@ exports.spotify = function(req, res) {
         for(let i = 0; i < length; i++) {
           text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
-        console.log(text);
         return text;
     };
 
@@ -162,8 +161,9 @@ exports.search = async function(req, res) {
 }
 
 exports.youtube = async function(req, res) {
-    if(req.user)
-        console.log(req.user.email);
+    if(req.user) {
+        /* play from a user's playlist by default if they are logged in */
+    }
     const videoId = await YoutubeController.default(models);
     data = {
         videoId: videoId,
@@ -200,23 +200,31 @@ exports.getPlaylistSongs = function(req, res) {
             }
         ]
     }).then(datas => {
-        const resObj = datas.playlists.map(data => {
-            const resObj2 = data.playlist_songs.map(data2 => {
-                return Object.assign(
-                    {},
-                    {
-                        user: datas.email,
-                        playlist_name: data.name,
-                        song_name: data2.song.name,
-                        artist_name: data2.song.artist.name,
-                    }
-                );
-            })
-                return resObj2;
-            })
-            res.header("Content-Type",'application/json');
-            res.send(JSON.stringify(resObj, null, 4));
-        })
+        let resObj = {};
+        if(datas !== null) {
+            resObj = datas.playlists.map(data => {
+                const resObj2 = data.playlist_songs.map(data2 => {
+                    return Object.assign(
+                        {},
+                        {
+                            user: datas.email,
+                            playlist_name: data.name,
+                            song_name: data2.song.name,
+                            artist_name: data2.song.artist.name,
+                        }
+                    );
+                })
+                    return resObj2;
+                })
+        }
+        else {
+            resObj = {};    //user with email not found 
+        }
+        console.log(Object.keys(resObj).length);
+        res.header("Content-Type",'application/json');
+        res.send(JSON.stringify(resObj, null, 4));
+    }).catch(err => console.log(err));
+        
 }
 
 const Sequelize = require('sequelize');
