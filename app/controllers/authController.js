@@ -162,6 +162,8 @@ exports.search = async function(req, res) {
 }
 
 exports.youtube = async function(req, res) {
+    if(req.user)
+        console.log(req.user.email);
     const videoId = await YoutubeController.default(models);
     data = {
         videoId: videoId,
@@ -245,7 +247,8 @@ exports.realtimeSearch = function(req, res) {
         data.forEach(value => {             
             results.push({                  //push object containing song_name and artist_name to results array
                 song_name: value.name,
-                artist_name: value['artist.name']
+                artist_name: value['artist.name'],
+                youtube_id: value.youtube,
             });
         })          
                                             //sort result so better matches are at the beginning of array
