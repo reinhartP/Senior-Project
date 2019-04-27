@@ -127,7 +127,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 <script>
-  $("#syncPlaylist").click(function () {
+  $("[id^=syncPlaylist]").click(function () {
     var name = $(this).closest("tr").find("td:eq(1)").text();
     $.ajax({
         url: 'api/test',
@@ -135,9 +135,6 @@
         contentType: 'application/json',
         data: JSON.stringify({
             spotifyPlaylistName: name}),
-        success: (response) => {
-            
-        }
     })
     });
     $("#searchButton").click(function() {
