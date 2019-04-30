@@ -1,66 +1,52 @@
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require("bcrypt-nodejs");
 
 module.exports = (sequelize, Sequelize) => {
     let modelDefinition = {
         id: {
             type: Sequelize.UUID,
             defaultValue: Sequelize.UUIDV4,
-            primaryKey:  true,
+            primaryKey: true
+        },
+        username: {
+            type: Sequelize.STRING,
+            unique: true
         },
         email: {
             type: Sequelize.STRING,
             validate: {
                 isEmail: true
-            },
+            }
         },
         password: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         spotify_access: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         spotify_refresh: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         google_id: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         google_token: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         google_email: {
-            type: Sequelize.STRING,
+            type: Sequelize.STRING
         },
         google_name: {
-            type: Sequelize.STRING,
-        },
-    }
-    let modelOptions = {
-        hooks: {
-            beforeCreate: hashPassword,
+            type: Sequelize.STRING
         }
-    }
-    let User = sequelize.define('user', modelDefinition, modelOptions);
+    };
+    let User = sequelize.define("user", modelDefinition);
 
     User.associate = function(models) {
         User.hasMany(models.playlist, {
-            foreignKey: 'user_id',
-            sourceKey: 'id',
+            foreignKey: "user_id",
+            sourceKey: "id"
         });
-    }
-
-    function hashPassword(user) {
-        user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(12), null);
-    };
-
-    User.prototype.generateHash = function(password) {
-        let newPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(12), null);
-        return newPassword;
-    }
-
-    User.prototype.validPassword = function(password) {
-        return bcrypt.compareSync(password, this.password);
     };
 
     return User;
-}
+};

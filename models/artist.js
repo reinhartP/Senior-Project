@@ -16,7 +16,11 @@ module.exports = (sequelize, Sequelize) => {
         },
     };
 
-    let Artist = sequelize.define('artist', modelDefinition, {charset: 'utf8mb4', collate: 'utf8mb4_unicode_ci'});
+    let modelOptions = {
+        charset: 'utf8mb4',
+        collage: 'utf8mb4_unicode_ci',
+    };
+    let Artist = sequelize.define('artist', modelDefinition, modelOptions);
     Artist.associate = function(models) {
         Artist.hasMany(models.song, {
             foreignKey: 'artist_id',

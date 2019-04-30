@@ -1,200 +1,153 @@
 // config/passport.js
 
 // load all the things we need
-let LocalStrategy   = require('passport-local').Strategy;
-let GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy;
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
+const JWTstrategy = require("passport-jwt").Strategy;
+const ExtractJWT = require("passport-jwt").ExtractJwt;
+const bcrypt = require("bcrypt-nodejs");
 // load up the user model
-let models          = require('../models/');
-let configAuth      = require('./auth');
+let models = require("../models/");
+let configAuth = require("./auth");
 
-module.exports = function(passport) {               // expose this function to our app using module.exports
-    let User = models.user;
-        // passport session setup
-        // required for persistent login sessions
-        // passport needs ability to serialize and unserialize users out of session
+let User = models.user;
+let op = models.Sequelize.Op;
+// LOCAL SIGNUP
+// we are using named strategies since we have one for login and one for signup
+// by default, if there was no name, it would just be called 'local'
 
-    
-    passport.serializeUser(function(user, done) {   // used to serialize the user for the session
-        done(null, user.id);
-    });
-
-    
-    passport.deserializeUser((id, done) => {        // used to deserialize the user
-        User.findOne({
-            where: {
-                id: id
-        }}).then(user => {
-            if(user) {
-                done(null, user.get());
-            }
-            else {
-                done(null, null);
-            }
-        });
-    });
-
-    // LOCAL SIGNUP
-    // we are using named strategies since we have one for login and one for signup
-    // by default, if there was no name, it would just be called 'local'
-
-    passport.use('local-signup', new LocalStrategy({
-        
-        usernameField : 'email',            // by default, local strategy uses username and password, we will override with email
-        passwordField : 'password',
-        passReqToCallback : true            // allows us to pass back the entire request to the callback
-    },
-    function(req, email, password, done) {
-
-        process.nextTick(function() {   //asynchronous
-                                        //User.findOne won't run unless data is sent back
-        
-        if(!req.user) {                 //user not currently logged in
-            User.findOne({              
-                where: {
-                    email :  email, 
-                }}).then((user) => {
-                
-                if (user) {             // user already exists with that email
-                    return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-                } 
-                else {                      // no user with that email
-                    let data            = { // create the user
-                        email: email,
-                        password: password,
-                    };
-                    User.create(data).then((newUser, created) => {
-                        if (!newUser) {
-                            return done(null, false);
-                        }
-                        
-                        if (newUser) {
-                            return done(null, newUser);
-                        }
-                    }).catch(err => {
-                        if(err.errors[0].validatorName === 'isEmail') {
-                            return done(null, false, req.flash('signupMessage', 'Invalid email'));
-                        }
-                    });
-                }})
-            }
-            else {                          //user is logged in, connect local account
+passport.use(
+    "local-signup",
+    new LocalStrategy(
+        {
+            usernameField: "email", // by default, local strategy uses username and password, we will override with email
+            passwordField: "password",
+            session: false,
+            passReqToCallback: true
+        },
+        (req, email, password, done) => {
+            try {
+                console.log("username", req.body.username);
                 User.findOne({
                     where: {
-                        email: email,
-                    }
-                }).then((user) => {
-                    if(!user) {                                 //user with that email doesn't exist
-                        return done(null, false, req.flash('signupMessage', 'Email or password is incorrect'));
-                    }
-                    if(!user.validPassword(password)) {         //password is invalid
-                        return done(null, false, req.flash('signupMessage', 'Email or password is incorrect'));
-                    }
-                    else {                                  
-                        let currentUser = req.user;
-                        User.findByPk(currentUser.id).then(newUser => {     //finds the current user in database
-                            let newPassword = user.generateHash(password);  //generate new hash for password
-                            newUser.update({                                //update the email/password of currently logged in Google user
-                                email:       email,
-                                password:    newPassword,
-                            }).then(newUser => {
-                                User.destroy({                              //remove old record of local account from db
-                                    where: {
-                                        id: user.id,
-                                    }
-                                });
-                                return done(null, newUser);
-                            });
-                        });
-                    }
-                })
-                
-            }
-        });
-        
-    }));
-        
-
-    // LOCAL LOGIN
-    passport.use('local-login', new LocalStrategy({
-        usernameField : 'email',
-        passwordField : 'password',
-        passReqToCallback : true
-    },
-    function(req, email, password, done) { // callback with email and password from our form
-
-        User.findOne({ 
-            where: {
-                email :  email,
-            }
-        }).then((user) => {
-            
-            if (!user)                                                                          // if no user is found, return the message
-                return done(null, false, req.flash('loginMessage', 'No user found.'));          // req.flash is the way to set flashdata using connect-flash
-            
-            if (!user.validPassword(password))                                                  // if the user is found but the password is wrong
-                return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));   // create the loginMessage and save it to session as flashdata
-
-            
-            return done(null, user);                                                            // all is well, return successful user
-        }).catch(err => console.log(err));
-        
-    }));
-
-    // GOOGLE
-    passport.use(new GoogleStrategy({
-
-        clientID        : configAuth.googleAuth.clientID,
-        clientSecret    : configAuth.googleAuth.clientSecret,
-        callbackURL     : configAuth.googleAuth.callbackURL,
-        passReqToCallback: true,
-    },
-    function(req, token, refreshToken, profile, done) {
-
-        process.nextTick(function() {
-            
-            if(!req.user) {                                             //check if user is alraedy logged in
-                
-                User.findOne({                                          // try to find the user based on their google id
-                    where: {
-                        google_id : profile.id 
-                    }
-                }).then(user => {
-                    if (user) {
-                        if(!user.google_token) {                         //googleId is found but there is no token
-                            user.update({                               //update google info
-                                google_token: token,
-                                google_name: profile.displayName,
-                                google_email: profile.emails[0].value,
-                            }).then(newUser => done(null, newUser));
+                        [op.or]: {
+                            email: email,
+                            username: req.body.username
                         }
-                        return done(null, user);                        // if a user is found, log them in
-                    } 
-                    else {
-                        let data          = {};                         // if the user isnt in our database, create a new user
-                        // set all of the relevant information
-                        data.google_dd    = profile.id;
-                        data.google_token = token;
-                        data.google_name  = profile.displayName;
-                        data.google_email = profile.emails[0].value;     // pull the first email
-                        User.create(data).then(newUser => {
-                            return done(null, newUser);
-                        })
+                    },
+                    raw: true
+                }).then(user => {
+                    console.log(user);
+                    if (user != null) {
+                        if (user.email === email) {
+                            console.log("email already taken");
+                            return done(null, false, {
+                                message: "email is already taken"
+                            });
+                        } else if (user.username === req.body.username) {
+                            console.log("username already taken");
+                            return done(null, false, {
+                                message: "username is already taken"
+                            });
+                        }
+                    } else {
+                        bcrypt.hash(
+                            password,
+                            bcrypt.genSaltSync(12),
+                            null,
+                            (err, hashedPassword) => {
+                                User.create({
+                                    email,
+                                    password: hashedPassword
+                                }).then(user => {
+                                    console.log("user created");
+                                    return done(null, user);
+                                });
+                            }
+                        );
                     }
                 });
+            } catch (err) {
+                if (err.errors[0].validatorName === "isEmail") {
+                    return done(null, false, "invalid email");
+                }
+                done(err);
             }
-            else {                                                      //connect google account, user is currently logged in
-                let user = req.user;
-                User.findByPk(user.id).then(newUser => {                //search id of current user
-                    newUser.update({                                    //update their record to include google account info
-                        google_id:       profile.id,
-                        google_token:    token,
-                        google_email:    profile.emails[0].value,
-                        google_name:     profile.displayName,
-                    }).then(newUser => {
-                        return done(null, newUser);
-                    })
-                })
+        }
+    )
+);
+
+// LOCAL LOGIN
+passport.use(
+    "local-login",
+    new LocalStrategy(
+        {
+            usernameField: "email",
+            passwordField: "password",
+            session: false
+        },
+        (email, password, done) => {
+            // callback with email and password from our form
+            try {
+                User.findOne({
+                    where: {
+                        email: email
+                    },
+                    raw: true
+                }).then(user => {
+                    if (user === null) {
+                        return done(null, false, { message: "bad username" });
+                    } else {
+                        bcrypt.compare(
+                            password,
+                            user.password,
+                            (err, response) => {
+                                if (response !== true) {
+                                    console.log("passwords do not match");
+                                    return done(null, false, {
+                                        message: "passwords do not match"
+                                    });
+                                }
+                                console.log("user found & authenticated");
+                                return done(null, user);
+                            }
+                        );
+                    }
+                });
+            } catch (err) {
+                done(err);
             }
-        });
-    }));
+        }
+    )
+);
+
+//JWT
+
+const opts = {
+    jwtFromRequest: ExtractJWT.fromAuthHeaderWithScheme("JWT"),
+    secretOrKey: configAuth.jwtSecret
 };
+
+passport.use(
+    "jwt",
+    new JWTstrategy(opts, (jwt_payload, done) => {
+        try {
+            User.findOne({
+                where: {
+                    email: jwt_payload.id
+                }
+            }).then(user => {
+                if (user) {
+                    console.log("user found in db in passport");
+                    done(null, user);
+                } else {
+                    console.log("user not found in db");
+                    done(null, false);
+                }
+            });
+        } catch (err) {
+            done(err);
+        }
+    })
+);
