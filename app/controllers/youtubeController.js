@@ -9,7 +9,7 @@ exports.search = async function(searchString) {
     let options = {
         url: 'https://www.googleapis.com/youtube/v3/search?',
         qs: {
-            part: 'id',
+            part: 'snippet',
             type: 'video',
             videoCategoryId: '10',
             maxResults: '10',
@@ -30,10 +30,16 @@ exports.search = async function(searchString) {
 
     const fetchResult = async(options) => {
         const data = await request.get(options).catch(err => console.log(err));
-        return data;
+        console.log(data.items[0].snippet.thumbnails)
+        let video = {
+            videoId: data.items[0].id.videoId,
+            title: data.items[0].snippet.title.replace(/&quot;/g, '"').replace(/&#39;/g, "'"),
+            thumbnail: data.items[0].snippet.thumbnails.medium.url
+        }
+        return video;
     }
-    return await main().then(value => {     //return first result from youtube api
-        return value.items[0].id.videoId
+    return await main().then(video => {     //return first result from youtube api
+        return video
     });   
 };
 
