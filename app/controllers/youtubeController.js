@@ -5,15 +5,16 @@ const moment = require('moment');
 
 var exports = module.exports = {};
 
-exports.search = async function(searchString) {
+exports.search = async function(models, searchString) {
+    let YoutubeSearch = models.youtube_search;
     let options = {
-        url: 'https://www.googleapis.com/youtube/v3/search?',
+        url: 'https://www.googleapis.com/youtube/v3/search',
         qs: {
             part: 'snippet',
             type: 'video',
             videoCategoryId: '10',
-            maxResults: '10',
-            key: process.env.YOUTUBE_API_KEY,
+            maxResults: '1',
+            key: process.env.YOUTUBE_API_KEY5,
             q: searchString,
         },
         json: true
@@ -21,20 +22,86 @@ exports.search = async function(searchString) {
 
     async function main() {
         try{
-            return await fetchResult(options);  //return search results from youtube api
+            
+            return await searchVideo();  //return search results from youtube api
             }
         catch(err) {
             console.log(err);
         }
     }
 
+    const searchVideo = async() => {
+        const data = await YoutubeSearch.findOne({
+            where: {
+                [op.or]: {
+                    search_string: {
+                        [op.like]: searchString,
+                    },
+                    title: {
+                        [op.like]: searchString,
+                    },
+                },
+            },
+            raw: true,
+        })
+        if(data !== null) {     //search found in table
+            console.log('value found in search table')
+            options.headers = {}
+            options.headers['If-None-Match'] = data.etag;   //set etag in header
+            const results = await fetchResult(options)      //check if data has changed
+            if(typeof results.statusCode === 'undefined') {
+                console.log('update search table')
+                await YoutubeSearch.update({
+                    title: results.title,
+                    thumbnail: results.thumbnail,
+                    etag: results.etag,
+                    youtube_id: results.videoId,
+                },
+                {where: {
+                    id: data.id,
+                }})
+                return {
+                    videoId: results.videoId,
+                    title: results.title,
+                    thumbnail: results.thumbnail,
+                }
+            }
+            let video = {
+                videoId: data.youtube_id,
+                title: data.title,
+                thumbnail: data.thumbnail,
+            }
+            return video
+        }
+        else {      //no match found in table
+            console.log('no match found in search table')
+            const video = await fetchResult(options)
+            await YoutubeSearch.create({
+                search_string: searchString,
+                title: video.title,
+                thumbnail: video.thumbnail,
+                etag: video.etag,
+                youtube_id: video.videoId,
+            })
+            return video
+        }
+    }
+
     const fetchResult = async(options) => {
-        const data = await request.get(options).catch(err => console.log(err));
-        console.log(data.items[0].snippet.thumbnails)
-        let video = {
-            videoId: data.items[0].id.videoId,
-            title: data.items[0].snippet.title.replace(/&quot;/g, '"').replace(/&#39;/g, "'"),
-            thumbnail: data.items[0].snippet.thumbnails.medium.url
+        const data = await request.get(options).catch(err => {
+            console.log('+1')
+            return {statusCode: err.statusCode}
+        });
+        let video = data;
+        
+        if(typeof data.statusCode === 'undefined') {    //old values out of date, update
+            console.log('+100')
+            video = {
+                etag: data.etag,
+                videoId: data.items[0].id.videoId,
+                title: data.items[0].snippet.title.replace(/&quot;/g, '"').replace(/&#39;/g, "'"),
+                thumbnail: data.items[0].snippet.thumbnails.medium.url
+            }
         }
         return video;
     }
@@ -46,7 +113,7 @@ exports.search = async function(searchString) {
 exports.default = async function(models) {
     let TopSong = models.top_song;
     let options = {
-        url: 'https://www.googleapis.com/youtube/v3/videos?',
+        url: 'https://www.googleapis.com/youtube/v3/videos',
         qs: {
             part: 'id',
             chart: 'mostPopular',
