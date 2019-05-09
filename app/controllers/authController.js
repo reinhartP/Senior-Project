@@ -1,5 +1,5 @@
 const sort = require("match-sorter");
-
+const passport = require('passport')
 let PlaylistController = require("../controllers/playlistController"),
     AuthController = require("../controllers/spotifyAuthController"),
     YoutubeController = require("../controllers/youtubeController");
@@ -10,73 +10,8 @@ const querystring = require("querystring");
 
 var exports = (module.exports = {});
 
-exports.signup = function(req, res) {
-    res.render("signup.ejs", { message: req.flash("signupMessage") });
-};
-
-exports.signin = function(req, res) {
-    // render the page and pass in any flash data if it exists
-    res.render("login.ejs", { message: req.flash("loginMessage") });
-};
-
-exports.logout = function(req, res) {
-    req.logout();
-    res.redirect("/");
-};
-
-exports.profile = function(req, res) {
-    let Playlist = models.playlist;
-    playlists = {
-        items: [],
-    };
-    async function main() {
-        //main function that does everything
-        try {
-            const data = await fetchPlaylists(req.user.id); //stores returned api info in data
-            const playlists = await getPlaylist(data); //stores object with playlist info(name, id) in playlists
-            res.render("profile.ejs", {
-                user: req.user,
-                playlists: playlists.items,
-            });
-        } catch (err) {
-            console.log(err);
-        }
-    }
-    const fetchPlaylists = async userId => {
-        const artistId = await Playlist.findAll({
-            where: {
-                user_id: userId,
-            },
-        });
-        return artistId; //returns the row information that was found/inserted
-    };
-    const getPlaylist = async data => {
-        for (let i = 0; i < data.length; i++) {
-            playlists.items[i] = {};
-            playlists.items[i].name = data[i].name;
-        }
-        return playlists; //returns the row information that was found/inserted
-    };
-    main();
-};
-
-exports.connect = function(req, res) {
-    res.render("connect-local.ejs", { message: req.flash("signupMessage") });
-};
-
-let User = models.user;
-exports.unlinkGoogle = function(req, res) {
-    let user = req.user;
-    User.findByPk(user.id).then(newUser => {
-        newUser
-            .update({
-                google_token: null,
-            })
-            .then(() => res.redirect("/profile"));
-    });
-};
-
-exports.spotify = function(req, res) {
+let currentUserId = '';
+exports.spotify = function(req, res, next) {
     let generateRandomString = function(length) {
         let text = "";
         let possible =
@@ -89,56 +24,67 @@ exports.spotify = function(req, res) {
         }
         return text;
     };
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+        currentUserId = user.id
+    })(req, res, next)
 
     let stateKey = "spotify_auth_state";
     let state = generateRandomString(16);
     res.cookie(stateKey, state);
 
     let scope = "user-read-private user-read-email playlist-read-private";
-    res.redirect(
-        "https://accounts.spotify.com/authorize?" +
-            querystring.stringify({
-                response_type: "code",
-                client_id: process.env.SPOTIFY_CLIENT_ID,
-                scope: scope,
-                redirect_uri: process.env.SPOTIFY_CALLBACK_URL,
-                state: state,
-            })
-    );
+    let authorizationLink = "https://accounts.spotify.com/authorize?" +
+    querystring.stringify({
+        response_type: "code",
+        client_id: process.env.SPOTIFY_CLIENT_ID,
+        scope: scope,
+        redirect_uri: process.env.SPOTIFY_CALLBACK_URL,
+        state: state,
+    })
+    res.send({
+        link: authorizationLink,
+    })
 };
 
-exports.spotifyCallback = function(req, res) {
+exports.spotifyCallback = function(req, res, next) {
     async function main() {
         try {
-            const spotifyTokens = await AuthController.authorize(
+            await AuthController.authorize(
                 req.query.code,
                 models,
-                req.user.id
+                currentUserId
             );
+            currentUserId = '';
             //tokens = spotifyTokens;
-            res.redirect("/spotify/playlist");
+            redirect();
         } catch (err) {
             console.log(err);
         }
     }
+    const redirect = async () => {
+        res.redirect('http://localhost:3000/api/after-auth')
+    }
     main();
 };
 
-exports.spotifyPlaylist = function(req, res) {
+exports.spotifyPlaylist = function(req, res, next) {
     async function main() {
         //main function that does everything
         try {
+            await passport.authenticate('jwt', { session: false }, (err, user, info) => {
+                currentUserId = user.id
+            })(req, res, next)
+            await delay(500)
             const access_token = await AuthController.refresh(
                 models,
-                req.user.id
+                currentUserId
             );
-            await PlaylistController.syncPlaylists(
+            const playlists = await PlaylistController.syncPlaylists(
                 access_token,
                 models,
-                req.user.id
+                currentUserId
             );
-            await delay(500);
-            redirect();
+            res.send(playlists)
         } catch (err) {
             console.log(err);
         }
@@ -174,13 +120,9 @@ exports.spotifySyncPlaylist = function(req, res) {
 };
 
 exports.search = async function(req, res) {
-    const videoId = await YoutubeController.search(req.query.search);
-    data = {
-        videoId: videoId,
-    };
-
+    const video = await YoutubeController.search(models, req.query.search);
     res.header("Content-Type", "application/json");
-    res.send(JSON.stringify(data, null, 4));
+    res.send(JSON.stringify(video, null, 4));
 };
 
 exports.youtube = async function(req, res) {
@@ -197,10 +139,10 @@ exports.youtube = async function(req, res) {
 
 exports.getPlaylistSongs = function(req, res) {
     let User = models.user;
-    let email = req.query.email || "test@test.com";
+    let username = req.query.user || "test";
     User.findOne({
         where: {
-            email: email,
+            username: username,
         },
         include: [
             {
@@ -245,6 +187,7 @@ exports.getPlaylistSongs = function(req, res) {
                 resObj = {}; //user with email not found
             }
             console.log(Object.keys(resObj).length);
+            console.log(resObj)
             res.header("Content-Type", "application/json");
             res.send(JSON.stringify(resObj, null, 4));
         })
@@ -278,7 +221,7 @@ exports.realtimeSearch = function(req, res) {
         ],
     }).then(data => {
         let results = [];
-        data.forEach(value => {
+        data.forEach((value, index) => {
             results.push({
                 //push object containing song_name and artist_name to results array
                 song_name: value.name,
