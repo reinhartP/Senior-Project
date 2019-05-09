@@ -85,15 +85,25 @@ module.exports = function(app) {
                 res.send(info.message);
             } else {
                 console.log("user found in db from route");
-                res.status(200).send({
-                    auth: true,
-                    id: user.id,
-                    username: user.username,
-                    email: user.email,
-                    password: user.password,
-                    playlists: [],
-                    message: "user found in db",
-                });
+                models.playlist.findAll({
+                    where: {
+                        user_id: user.id,
+                    },
+                    raw: true,
+                }).then(data => {
+                    res.status(200).send({
+                        auth: true,
+                        spotifyAuth: user.spotify_access !== null ? true : false,
+                        id: user.id,
+                        username: user.username,
+                        email: user.email,
+                        password: user.password,
+                        syncPlaylists: data,
+                        searchPlaylists: [],
+                        message: "user found in db",
+                    });
+                })
+                
             }
         })(req, res, next);
     });
@@ -102,8 +112,9 @@ module.exports = function(app) {
     //app.get("/logout", authController.logout);
 
     //spotify
-    app.get("/spotify/sync", isLoggedIn, authController.spotify);
+    app.get("/spotify/connect", isLoggedIn, authController.spotify);
 
+    
     app.get("/spotify/callback", isLoggedIn, authController.spotifyCallback);
 
     app.get("/spotify/playlist", isLoggedIn, authController.spotifyPlaylist);
@@ -114,9 +125,11 @@ module.exports = function(app) {
     //app.get('/api/lastfm', authController.lastfm);
     app.get("/api/search", authController.realtimeSearch);
     app.get("/api/youtube/search", authController.search);
-    app.post("/api/test", authController.spotifySyncPlaylist); //sync songs/artists of a playlist
+    app.post("/api/spotify/sync/playlist", authController.spotifySyncPlaylist); //sync songs/artists of a playlist
     app.get("/api/user/playlists", authController.getPlaylistSongs); //returns all of the playlists and the songs in the playlist for a user
-    //right now just returns for user test@test.com
+    app.get("/api/spotify/authorize", authController.spotify);
+    app.get("/api/spotify/callback", authController.spotifyCallback);
+    app.get("/api/spotify/sync", authController.spotifyPlaylist);
 
     app.get("*", function(req, res) {
         //home page
