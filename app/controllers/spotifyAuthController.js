@@ -25,7 +25,7 @@ exports.authorize = async function(code, models, userId) {
         },
         json: true
     };
-    await request(authOptions).then(body => {
+    const accessToken = await request(authOptions).then(body => {
         tokens = {
             access_token: body.access_token,
             refresh_token: body.refresh_token,
@@ -39,7 +39,10 @@ exports.authorize = async function(code, models, userId) {
                 id: userId
             }
         });
+
+        return tokens.access_token
     }).catch(err => console.log(err));
+    return accessToken
 };
 
 exports.refresh = async function(models, userId, callback) {
