@@ -12,14 +12,15 @@ exports.syncPlaylists = async function(token, models, userId) {
     let options = {
         url: "https://api.spotify.com/v1/me/playlists",
         headers: { Authorization: "Bearer " + access_token },
-        json: true
+        json: true,
     };
 
     async function main() {
         //main function that does everything
         try {
             const data = await fetchPlaylists(options); //stores returned api info in data
-            await getPlaylist(data); //stores object with playlist info(name, id) in playlists
+            const playlists = await getPlaylist(data);                    //stores object with playlist info(name, id) in playlists
+            return playlists;
         } catch (err) {
             console.log(err);
         }
@@ -34,8 +35,16 @@ exports.syncPlaylists = async function(token, models, userId) {
     const getPlaylist = async data => {
         //parse playlist info objects into arrays
         let playlists = {
-            items: []
+            items: [],
         };
+        /*data.items.forEach((playlist, index) => {
+            playlists.items.push({
+                name: playlist.name,
+                id: playlist.id,
+                link: playlist.link,
+                total: playlist.total,
+            })
+        })*/
         for (let i = 0; i < data.items.length; i++) {
             //loops through all playlists and inserts names, etc into array
             playlists.items[i] = {};
@@ -45,14 +54,14 @@ exports.syncPlaylists = async function(token, models, userId) {
             playlists.items[i].total = data.items[i].tracks.total;
         }
         addPlaylist(playlists); //adds playlists to db
-        return playlists;
+        return playlists.items
     };
 
     const addPlaylist = async playlists => {
         await Playlist.destroy({
             where: {
-                user_id: userId
-            }
+                user_id: userId, // and spotify is not null
+            },
         });
         playlists.items.forEach(playlistInfo => {
             //goes through the array of playlists
@@ -60,13 +69,13 @@ exports.syncPlaylists = async function(token, models, userId) {
                 name: playlistInfo.name,
                 spotify_id: playlistInfo.id,
                 user_id: userId,
-                number_of_songs: playlistInfo.total
+                number_of_songs: playlistInfo.total,
             }).catch(err => console.log(err));
         });
     };
 
-    main();
-    return null;
+    const playlists = await main();
+    return playlists;
 };
 
 exports.syncSongsArtists = function(
@@ -82,7 +91,7 @@ exports.syncSongsArtists = function(
     let options = {
         url: "https://api.spotify.com/v1/playlists/",
         headers: { Authorization: "Bearer " + access_token },
-        json: true
+        json: true,
     };
 
     async function main() {
@@ -101,9 +110,9 @@ exports.syncSongsArtists = function(
             where: {
                 [op.and]: {
                     spotify_id: playlistId,
-                    user_id: userId
-                }
-            }
+                    user_id: userId,
+                },
+            },
         });
 
         return data.dataValues.id;
@@ -114,13 +123,13 @@ exports.syncSongsArtists = function(
             where: {
                 [op.and]: {
                     user_id: userId,
-                    name: playlistName
-                }
-            }
+                    name: playlistName,
+                },
+            },
         });
         let playlist = {
             id: data.dataValues.spotify_id,
-            total: data.dataValues.number_of_songs
+            total: data.dataValues.number_of_songs,
         };
         return playlist; //returns the row information that was found/inserted
     };
@@ -144,7 +153,7 @@ exports.syncSongsArtists = function(
                     playlist.id +
                     "/tracks?" + //change offset in url
                     querystring.stringify({
-                        offset: i * 100
+                        offset: i * 100,
                     });
                 const data = await fetchSongs(songOptions); //stores returned api info in data
                 data.playlistId = playlistId;
@@ -162,13 +171,13 @@ exports.syncSongsArtists = function(
             let artist = {
                 //create artist object with name and spotify id
                 name: songs.track.artists[0].name,
-                spotify: songs.track.artists[0].id
+                spotify: songs.track.artists[0].id,
             };
             const artistId = await addArtist(artist);
             const songId = await addSong(songs, artistId[0].dataValues.id);
             playlistSongs.push({
                 song_id: songId[0].dataValues.id,
-                playlist_id: body.playlistId
+                playlist_id: body.playlistId,
             });
         });
         await Promise.all(promises);
@@ -179,14 +188,14 @@ exports.syncSongsArtists = function(
             where: {
                 [op.and]: {
                     spotify: song.track.id,
-                    artist_id: artistId
-                }
+                    artist_id: artistId,
+                },
             },
             defaults: {
                 name: song.track.name,
                 spotify: song.track.id,
-                artist_id: artistId
-            }
+                artist_id: artistId,
+            },
         })
             .then(songId => {
                 return songId;
@@ -197,7 +206,7 @@ exports.syncSongsArtists = function(
 
     const addPlaylistSong = async playlistSongs => {
         PlaylistSongs.bulkCreate(playlistSongs, {
-            ignoreDuplicates: true
+            ignoreDuplicates: true,
         }).catch(err => err);
     };
 
@@ -206,12 +215,12 @@ exports.syncSongsArtists = function(
             //uses findOrCreate to add artist to database
             where: {
                 //tries to find artist with spotify.id
-                spotify: artist.spotify
+                spotify: artist.spotify,
             },
             defaults: {
                 //if it doesn't exist then it adds it to the database along with the artist name
-                name: artist.name
-            }
+                name: artist.name,
+            },
         }).catch(err => console.log(err));
         return artistId; //returns the row information that was found/inserted
     };
