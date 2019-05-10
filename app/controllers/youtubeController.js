@@ -119,7 +119,7 @@ exports.default = async function(models) {
             chart: 'mostPopular',
             maxResults: '10',
             videoCategoryId: '10',
-            key: process.env.YOUTUBE_API_KEY,
+            key: process.env.YOUTUBE_API_KEY2,
         },
         json: true
     };

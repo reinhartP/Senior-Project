@@ -4,11 +4,10 @@ let configAuth = require("../../config/auth");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const path = require('path')
-// app/routes.js
+
 module.exports = function(app) {
     let User = models.user;
     
-
     // LOGIN
     app.post("/login", (req, res, next) => {
         passport.authenticate("local-login", (err, user, info) => {
@@ -39,9 +38,6 @@ module.exports = function(app) {
             }
         })(req, res, next);
     });
-
-    // SIGNUP
-    //app.get('/signup', authController.signup);  // render the page and pass in any flash data if it exists
 
     app.post("/signup", (req, res, next) => {
         passport.authenticate("local-signup", (err, user, info) => {
@@ -107,32 +103,22 @@ module.exports = function(app) {
             }
         })(req, res, next);
     });
-
-    // LOGOUT
-    //app.get("/logout", authController.logout);
-
-    //spotify
-    app.get("/spotify/connect", isLoggedIn, authController.spotify);
-
     
-    app.get("/spotify/callback", isLoggedIn, authController.spotifyCallback);
+    app.get('/testauth', isLoggedIn, (req, res) => {
+        console.log('worked')
+    })
 
-    app.get("/spotify/playlist", isLoggedIn, authController.spotifyPlaylist);
-
-    app.get("/api/youtube/top", authController.youtube);
-
-    //test api routes
     //app.get('/api/lastfm', authController.lastfm);
-    app.get("/api/search", authController.realtimeSearch);
-    app.get("/api/youtube/search", authController.search);
+    app.get("/api/user/playlists", authController.getPlaylistSongs);            //returns all of the playlists/songs for a user
+    app.get("/api/search", authController.realtimeSearch);                      //queries db for search suggestions
+    app.get("/api/youtube/search", authController.search);                      //gets video info from youtube api
+    app.get("/api/youtube/top", authController.youtube);                        //get a song from top 10 trending music videos
+    app.get("/api/spotify/authorize", authController.spotify);                  //authorize with spotify
+    app.get("/api/spotify/callback", authController.spotifyCallback);           
+    app.get("/api/spotify/sync", authController.spotifyPlaylist);               //sync spotify playlists
     app.post("/api/spotify/sync/playlist", authController.spotifySyncPlaylist); //sync songs/artists of a playlist
-    app.get("/api/user/playlists", authController.getPlaylistSongs); //returns all of the playlists and the songs in the playlist for a user
-    app.get("/api/spotify/authorize", authController.spotify);
-    app.get("/api/spotify/callback", authController.spotifyCallback);
-    app.get("/api/spotify/sync", authController.spotifyPlaylist);
 
     app.get("*", function(req, res) {
-        //home page
         res.sendFile(path.join(__dirname, '../../../frontend/build/index.html'))
     });
 };
@@ -143,5 +129,6 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) return next();
 
     // if they aren't redirect them to the home page
-    res.redirect("/");
+    console.log('not authenticated')
+    res.redirect("/profile");
 }

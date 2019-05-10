@@ -6,7 +6,7 @@ const morgan        = require('morgan');
 const cookieParser  = require('cookie-parser');
 const bodyParser    = require('body-parser');
 const session       = require('express-session');
-
+const path          = require('path')
 const models      = require('./models');
 const env = require('dotenv').config(__dirname + './env');;
 const app = express();
@@ -24,7 +24,8 @@ app.use(cors());
 app.use(morgan('dev'));     //log every request to the console
 app.use(bodyParser.urlencoded({ extended: false }));      //get information from html forms
 app.use(bodyParser.json()); 
-app.use(express.static(__dirname + '/public'));
+app.use('/static', express.static(path.join(__dirname, '../frontend/build//static')));
+//app.use(express.static(path.join(__dirname + '../frontend/build')));
 
 //required for passport
 app.use(passport.initialize());

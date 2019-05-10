@@ -83,16 +83,16 @@ passport.use(
     "local-login",
     new LocalStrategy(
         {
-            usernameField: "email",
+            usernameField: "username",
             passwordField: "password",
             session: false
         },
-        (email, password, done) => {
+        (username, password, done) => {
             // callback with email and password from our form
             try {
                 User.findOne({
                     where: {
-                        email: email
+                        username: username
                     },
                     raw: true
                 }).then(user => {
@@ -135,7 +135,7 @@ passport.use(
         try {
             User.findOne({
                 where: {
-                    email: jwt_payload.id
+                    username: jwt_payload.id
                 }
             }).then(user => {
                 if (user) {
