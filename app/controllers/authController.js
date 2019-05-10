@@ -71,18 +71,16 @@ exports.spotifyPlaylist = function(req, res, next) {
     async function main() {
         //main function that does everything
         try {
-            await passport.authenticate('jwt', { session: false }, (err, user, info) => {
-                currentUserId = user.id
-            })(req, res, next)
-            await delay(500)
+            console.log(req)
+            const user = await passportJwtVerify(req, res, next)
             const access_token = await AuthController.refresh(
                 models,
-                currentUserId
+                user.id
             );
             const playlists = await PlaylistController.syncPlaylists(
                 access_token,
                 models,
-                currentUserId
+                user.id
             );
             res.send(playlists)
         } catch (err) {
@@ -93,32 +91,39 @@ exports.spotifyPlaylist = function(req, res, next) {
     const redirect = async () => {
         res.redirect("/profile");
     };
-    //res.header("Content-Type", 'application/json');
-    //res.send(JSON.stringify(tokens, null, 4));
-    //res.render('profile.ejs', {title: 'Spotify playlist', accessToken: tokens.access_token, refreshToken: tokens.refresh_token});
     main();
 };
 
-exports.spotifySyncPlaylist = function(req, res) {
+exports.spotifySyncPlaylist = function(req, res, next) {
     async function main() {
         try {
+            const user = await passportJwtVerify(req, res, next)
             const access_token = await AuthController.refresh(
                 models,
-                req.user.id
+                user.id
             );
             await PlaylistController.syncSongsArtists(
                 access_token,
                 models,
-                req.user.id,
+                user.id,
                 req.body.spotifyPlaylistName
             );
         } catch (err) {
             console.log(err);
         }
     }
+
     main();
 };
-
+function passportJwtVerify(req, res, next) {
+    return new Promise((resolve, reject) => {
+        passport.authenticate('jwt', { session: false }, (err, user, info) => {
+            currentUserId = user.id
+            if(user) resolve(user)
+            reject(err)
+        })(req, res, next)
+    })
+}
 exports.search = async function(req, res) {
     const video = await YoutubeController.search(models, req.query.search);
     res.header("Content-Type", "application/json");
@@ -186,8 +191,6 @@ exports.getPlaylistSongs = function(req, res) {
             } else {
                 resObj = {}; //user with email not found
             }
-            console.log(Object.keys(resObj).length);
-            console.log(resObj)
             res.header("Content-Type", "application/json");
             res.send(JSON.stringify(resObj, null, 4));
         })
@@ -247,3 +250,4 @@ exports.lastfm = async function(req, res) {
     res.header("Content-Type", "application/json");
     res.send(JSON.stringify(data, null, 4));
 };
+
