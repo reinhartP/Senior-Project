@@ -1,13 +1,10 @@
-const cors = require('cors');
-const querystring = require('querystring');
-const cookieParser = require('cookie-parser');
+
 const request = require('request-promise-native'); 
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;       // Your client id
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;   // Your secret
 const redirect_uri = process.env.SPOTIFY_CALLBACK_URL;      // Your redirect uri
 
-let stateKey = 'spotify_auth_state';
 var exports = module.exports = {};
 
 exports.authorize = async function(code, models, userId) {

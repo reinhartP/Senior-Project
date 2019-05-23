@@ -14,7 +14,7 @@ exports.search = async function(models, searchString) {
             type: 'video',
             videoCategoryId: '10',
             maxResults: '1',
-            key: process.env.YOUTUBE_API_KEY5,
+            key: process.env.YOUTUBE_API_KEY4,
             q: searchString,
         },
         json: true
@@ -119,7 +119,7 @@ exports.default = async function(models) {
             chart: 'mostPopular',
             maxResults: '10',
             videoCategoryId: '10',
-            key: process.env.YOUTUBE_API_KEY2,
+            key: process.env.YOUTUBE_API_KEY4,
         },
         json: true
     };

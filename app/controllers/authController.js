@@ -7,7 +7,7 @@ let PlaylistController = require("../controllers/playlistController"),
 
 const models = require("../../models");
 const querystring = require("querystring");
-
+    
 var exports = (module.exports = {});
 
 let currentUserId = '';
@@ -71,7 +71,6 @@ exports.spotifyPlaylist = function(req, res, next) {
     async function main() {
         //main function that does everything
         try {
-            console.log(req)
             const user = await passportJwtVerify(req, res, next)
             const access_token = await AuthController.refresh(
                 models,
@@ -87,10 +86,6 @@ exports.spotifyPlaylist = function(req, res, next) {
             console.log(err);
         }
     }
-    const delay = ms => new Promise(res => setTimeout(res, ms));
-    const redirect = async () => {
-        res.redirect("/profile");
-    };
     main();
 };
 

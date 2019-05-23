@@ -1,24 +1,19 @@
 const Sequelize = require("sequelize");
 const op = Sequelize.Op;
-const request = require("request-promise-native");
-const querystring = require("querystring");
-let access_token = "";
+const SpotifyWebApi = require('spotify-web-api-node');
 
 var exports = (module.exports = {});
 
-exports.syncPlaylists = async function(token, models, userId) {
+exports.syncPlaylists = async function(accessToken, models, userId) {
+    let spotifyApi = new SpotifyWebApi({
+        accessToken: accessToken,
+    })
     let Playlist = models.playlist;
-    access_token = token;
-    let options = {
-        url: "https://api.spotify.com/v1/me/playlists",
-        headers: { Authorization: "Bearer " + access_token },
-        json: true,
-    };
 
     async function main() {
         //main function that does everything
         try {
-            const data = await fetchPlaylists(options); //stores returned api info in data
+            const data = await spotifyApi.getUserPlaylists().then(data => data.body)
             const playlists = await getPlaylist(data);                    //stores object with playlist info(name, id) in playlists
             return playlists;
         } catch (err) {
@@ -26,25 +21,11 @@ exports.syncPlaylists = async function(token, models, userId) {
         }
     }
 
-    const fetchPlaylists = async options => {
-        //gets playlists from spotify api
-        const data = await request.get(options);
-        return data;
-    };
-
     const getPlaylist = async data => {
         //parse playlist info objects into arrays
         let playlists = {
             items: [],
         };
-        /*data.items.forEach((playlist, index) => {
-            playlists.items.push({
-                name: playlist.name,
-                id: playlist.id,
-                link: playlist.link,
-                total: playlist.total,
-            })
-        })*/
         for (let i = 0; i < data.items.length; i++) {
             //loops through all playlists and inserts names, etc into array
             playlists.items[i] = {};
@@ -79,7 +60,7 @@ exports.syncPlaylists = async function(token, models, userId) {
 };
 
 exports.syncSongsArtists = function(
-    access_token,
+    accessToken,
     models,
     userId,
     playlistName
@@ -88,35 +69,20 @@ exports.syncSongsArtists = function(
         Songs = models.song,
         Playlist = models.playlist,
         PlaylistSongs = models.playlist_song;
-    let options = {
-        url: "https://api.spotify.com/v1/playlists/",
-        headers: { Authorization: "Bearer " + access_token },
-        json: true,
-    };
+
+    let spotifyApi = new SpotifyWebApi({
+        accessToken: accessToken,
+    })
 
     async function main() {
         //main function that does everything
         try {
             const playlist = await fetchPlaylists(); //stores returned api info in data
-            const playlistId = await getPlaylistId(playlist.id);
-            await getPlaylistSongs(playlist, playlistId); //stores object with playlist info(name, id) in playlists
+            await getPlaylistSongs(playlist); //stores object with playlist info(name, id) in playlists
         } catch (err) {
             console.log(err);
         }
     }
-
-    const getPlaylistId = async playlistId => {
-        const data = await Playlist.findOne({
-            where: {
-                [op.and]: {
-                    spotify_id: playlistId,
-                    user_id: userId,
-                },
-            },
-        });
-
-        return data.dataValues.id;
-    };
 
     const fetchPlaylists = async () => {
         const data = await Playlist.findOne({
@@ -128,35 +94,22 @@ exports.syncSongsArtists = function(
             },
         });
         let playlist = {
-            id: data.dataValues.spotify_id,
+            id: data.dataValues.id,
+            spotify_id: data.dataValues.spotify_id,
             total: data.dataValues.number_of_songs,
         };
         return playlist; //returns the row information that was found/inserted
     };
 
-    const fetchSongs = async songsOptions => {
-        //gets the songs of a playlist from spotify api
-        const data = await request.get(songsOptions);
-        return data;
-    };
-
-    const getPlaylistSongs = async (playlist, playlistId) => {
-        let songOptions = options;
+    const getPlaylistSongs = async (playlist) => {
         let numLoop;
         playlist.total > 500
             ? (numLoop = 5) //allow for a max of 300 songs per playlist
             : (numLoop = Math.ceil(playlist.total / 100));
         try {
             for (let i = 0; i < numLoop; i++) {
-                songOptions.url =
-                    "https://api.spotify.com/v1/playlists/" +
-                    playlist.id +
-                    "/tracks?" + //change offset in url
-                    querystring.stringify({
-                        offset: i * 100,
-                    });
-                const data = await fetchSongs(songOptions); //stores returned api info in data
-                data.playlistId = playlistId;
+                const data = await spotifyApi.getPlaylistTracks(playlist.spotify_id, { offset: i * 100, fields})
+                data.playlistId = playlist.id;
                 await manageSongsArtists(data); //call function to add songs/artists to db
             }
         } catch (err) {
@@ -183,6 +136,7 @@ exports.syncSongsArtists = function(
         await Promise.all(promises);
         addPlaylistSong(playlistSongs);
     }
+
     async function addSong(song, artistId) {
         const songId = await Songs.findOrCreate({
             where: {
