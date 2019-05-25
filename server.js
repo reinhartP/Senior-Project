@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({ extended: false })); //get information from html
 app.use(bodyParser.json());
 app.use(
     '/static',
-    express.static(path.join(__dirname, '../frontend/build//static'))
+    express.static(path.join(__dirname, './client/build//static'))
 );
 //app.use(express.static(path.join(__dirname + '../frontend/build')));
 
@@ -40,5 +40,5 @@ require('./app/routes/routes')(app); //load our routes and pass in our app and f
 //launch
 const server = app.listen(port);
 console.log(`Running at localhost:${port}`);
-const io = require('socket.io')(server);
+const io = require('socket.io').listen(server);
 let sockets = require('./app/controllers/socketController')(io);
