@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 const op = Sequelize.Op;
 const SpotifyWebApi = require('spotify-web-api-node');
 
@@ -7,14 +7,16 @@ var exports = (module.exports = {});
 exports.syncPlaylists = async function(accessToken, models, userId) {
     let spotifyApi = new SpotifyWebApi({
         accessToken: accessToken,
-    })
+    });
     let Playlist = models.playlist;
 
     async function main() {
         //main function that does everything
         try {
-            const data = await spotifyApi.getUserPlaylists().then(data => data.body)
-            const playlists = await getPlaylist(data);                    //stores object with playlist info(name, id) in playlists
+            const data = await spotifyApi
+                .getUserPlaylists()
+                .then(data => data.body);
+            const playlists = await getPlaylist(data); //stores object with playlist info(name, id) in playlists
             return playlists;
         } catch (err) {
             console.log(err);
@@ -35,7 +37,7 @@ exports.syncPlaylists = async function(accessToken, models, userId) {
             playlists.items[i].total = data.items[i].tracks.total;
         }
         addPlaylist(playlists); //adds playlists to db
-        return playlists.items
+        return playlists.items;
     };
 
     const addPlaylist = async playlists => {
@@ -59,12 +61,7 @@ exports.syncPlaylists = async function(accessToken, models, userId) {
     return playlists;
 };
 
-exports.syncSongsArtists = function(
-    accessToken,
-    models,
-    userId,
-    playlistName
-) {
+exports.syncSongsArtists = function(accessToken, models, userId, playlistName) {
     let Artist = models.artist,
         Songs = models.song,
         Playlist = models.playlist,
@@ -72,7 +69,7 @@ exports.syncSongsArtists = function(
 
     let spotifyApi = new SpotifyWebApi({
         accessToken: accessToken,
-    })
+    });
 
     async function main() {
         //main function that does everything
@@ -101,16 +98,19 @@ exports.syncSongsArtists = function(
         return playlist; //returns the row information that was found/inserted
     };
 
-    const getPlaylistSongs = async (playlist) => {
+    const getPlaylistSongs = async playlist => {
         let numLoop;
         playlist.total > 500
             ? (numLoop = 5) //allow for a max of 300 songs per playlist
             : (numLoop = Math.ceil(playlist.total / 100));
         try {
             for (let i = 0; i < numLoop; i++) {
-                const data = await spotifyApi.getPlaylistTracks(playlist.spotify_id, { offset: i * 100, fields})
-                data.playlistId = playlist.id;
-                await manageSongsArtists(data); //call function to add songs/artists to db
+                const data = await spotifyApi.getPlaylistTracks(
+                    playlist.spotify_id,
+                    { offset: i * 100 }
+                );
+                data.body.playlistId = playlist.id;
+                await manageSongsArtists(data.body); //call function to add songs/artists to db
             }
         } catch (err) {
             console.log(err);
