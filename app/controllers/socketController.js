@@ -113,11 +113,24 @@ exports = module.exports = io => {
 
         socket.on('sync video', data => {
             room = io.sockets.adapter.rooms['room-' + socket.roomnum];
-            if (room.host == socket.id) {
-                console.log('syncing');
+            if (room.host === socket.id) {
+                console.log('syncing video time');
                 socket.broadcast
                     .in('room-' + socket.roomnum)
-                    .emit('sync video', { currentTime: data.currentTime });
+                    .emit('sync client video', {
+                        currentTime: data.currentTime,
+                    });
+            }
+        });
+        socket.on('sync player state', data => {
+            room = io.sockets.adapter.rooms['room-' + socket.roomnum];
+            if (room.host === socket.id) {
+                console.log('syncing player state');
+                socket.broadcast
+                    .in('room-' + socket.roomnum)
+                    .emit('sync client player state', {
+                        playerState: data.playerState,
+                    });
             }
         });
         socket.on('new room', callback => {
@@ -144,16 +157,32 @@ exports = module.exports = io => {
                     io.sockets.adapter.rooms[
                         'room-' + roomnum
                     ].currVideo = videoId;
-                    callback(videoId); //sets the videoId clientside
+                    callback({ videoId, host: true }); //sets the videoId clientside
                 });
                 io.sockets.adapter.rooms['room-' + roomnum].queue = {
                     yt: [],
                 };
             } else {
                 //room already exists
-                callback(io.sockets.adapter.rooms['room-' + roomnum].currVideo); //send the currVideo id to the client
+                callback({
+                    videoId:
+                        io.sockets.adapter.rooms['room-' + roomnum].currVideo,
+                    host: false,
+                });
+                //send the currVideo id to the client
             }
-            updateQueue(); //sends the
+            //setInterval(pingClient, 5000);
+            updateQueue(); //sends the queue
+            setTimeout(
+                () =>
+                    socket
+                        .to(
+                            io.sockets.adapter.rooms['room-' + socket.roomnum]
+                                .host
+                        )
+                        .emit('sync host', {}),
+                1000
+            );
             //data is the room number
             /*socket.roomnum = data;
             userrooms[socket.id] = data;
@@ -279,6 +308,29 @@ exports = module.exports = io => {
             //otherwise emit error because client is not connected to a channel
             else io.to(channel[0]).emit('error', 'not connected to a room');
         });
+
+        function pingClient() {
+            console.log('pinging');
+            if (
+                io.sockets.adapter.rooms['room-' + socket.roomnum] !== undefined
+            ) {
+                host = io.sockets.adapter.rooms['room-' + socket.roomnum].host;
+                io.sockets.adapter.rooms[
+                    'room-' + socket.roomnum
+                ].time = Date.now();
+                io.to(host).emit('pinging');
+            }
+        }
+
+        socket.on('ponging', () => {
+            console.log(
+                'pong',
+
+                Date.now() -
+                    io.sockets.adapter.rooms['room-' + socket.roomnum].time
+            );
+        });
+
         function updateQueue(currVideo = null) {
             //only runs if the room exists
             currVideo === null || currVideo === undefined
