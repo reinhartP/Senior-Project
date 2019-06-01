@@ -181,7 +181,7 @@ exports = module.exports = io => {
                                 .host
                         )
                         .emit('sync host', {}),
-                1000
+                1500
             );
             //data is the room number
             /*socket.roomnum = data;
