@@ -21,7 +21,7 @@ models.sequelize
 require('./config/passport');
 app.use(
     require('prerender-node')
-        .set('prerenderToken', 'S5D3CMECgzJ1yST0fOYu')
+        .set('prerenderToken', process.env.PRERENDER_TOKEN)
         .set('protocol', 'https')
         .set('host', 'www.paghunie.com')
 );
