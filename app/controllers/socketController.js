@@ -110,17 +110,39 @@ exports = module.exports = io => {
             io.sockets.adapter.rooms['room-' + socket.roomnum].queue.yt = []; //empty the queue
             updateQueue(); //send out cleared queue to clients
         });
-
+        socket.on('update queue', data => {
+            switch (data.action) {
+                case 'remove':
+                    io.sockets.adapter.rooms[
+                        'room-' + socket.roomnum
+                    ].queue.yt.splice(data.index, 1);
+                    break;
+            }
+            updateQueue();
+        });
         socket.on('sync video', data => {
             room = io.sockets.adapter.rooms['room-' + socket.roomnum];
             if (room.host === socket.id) {
+                //manual sync request
                 console.log('syncing video time');
-                socket.broadcast
-                    .in('room-' + socket.roomnum)
-                    .emit('sync client video', {
+                if (data.requestingSocket !== undefined) {
+                    socket.to(data.requestingSocket).emit('sync client video', {
                         currentTime: data.currentTime,
                     });
+                } else {
+                    //sync everyone in room
+                    socket.broadcast
+                        .in('room-' + socket.roomnum)
+                        .emit('sync client video', {
+                            currentTime: data.currentTime,
+                        });
+                }
             }
+        });
+        socket.on('sync host', () => {
+            socket
+                .to(io.sockets.adapter.rooms['room-' + socket.roomnum].host)
+                .emit('sync host', { requestingSocket: socket.id });
         });
         socket.on('sync player state', data => {
             room = io.sockets.adapter.rooms['room-' + socket.roomnum];
@@ -169,20 +191,22 @@ exports = module.exports = io => {
                         io.sockets.adapter.rooms['room-' + roomnum].currVideo,
                     host: false,
                 });
+                setTimeout(
+                    () =>
+                        socket
+                            .to(
+                                io.sockets.adapter.rooms[
+                                    'room-' + socket.roomnum
+                                ].host
+                            )
+                            .emit('sync host', { requestingSocket: socket.id }),
+                    1700
+                );
                 //send the currVideo id to the client
             }
             //setInterval(pingClient, 5000);
             updateQueue(); //sends the queue
-            setTimeout(
-                () =>
-                    socket
-                        .to(
-                            io.sockets.adapter.rooms['room-' + socket.roomnum]
-                                .host
-                        )
-                        .emit('sync host', {}),
-                1500
-            );
+
             //data is the room number
             /*socket.roomnum = data;
             userrooms[socket.id] = data;
