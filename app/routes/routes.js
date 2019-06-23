@@ -123,9 +123,7 @@ module.exports = function(app) {
         res.sendFile(path.join(__dirname, '../../public/sitemap.xml'));
     });
     app.get('*', function(req, res) {
-        res.sendFile(
-            path.join(__dirname, '../../../frontend/build/index.html')
-        );
+        res.sendFile(path.join(__dirname, '../../client/build/index.html'));
     });
 };
 
