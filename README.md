@@ -1,6 +1,6 @@
 # Senior Proj
 
-Demo at https://paghunie.com
+Demo at https://paghunie-music-site.herokuapp.com
 
 ## Instructions
 
@@ -9,13 +9,13 @@ Demo at https://paghunie.com
 
     ```
     PORT=''
-    NODE_ENV='development'
+    NODE_ENV=''
 
     SPOTIFY_CLIENT_ID=''
     SPOTIFY_CLIENT_SECRET=''
     SPOTIFY_CALLBACK_URL=''
 
-    YOUTUBE_API_KEY=''
+    YOUTUBE_API_KEY4=''
 
     DATABASE_USERNAME=''
     DATABASE_PASSWORD=''
@@ -23,10 +23,13 @@ Demo at https://paghunie.com
     DATABASE_HOST=''
 
     JWT_SECRET=''
+    PRERENDER_TOKEN=''
     ```
 
--   Launch: `node server.js`
--   Visit in your browser at `http://localhost:3000`
+-   To build the frontend for production: `npm run build`
+-   Run React development server: `npm run start-frontend`
+-   Run backend: `npm start`
+-   Visit in your browser at `http://localhost:4500`
 
 ## Usage
 
@@ -74,8 +77,7 @@ Demo at https://paghunie.com
 
 ## Issues/Improvements
 
--   Create rooms with socket.io
--   Queue songs from playlists on the youtube page
+-   Create rooms with socketIO
 -   If a song has multiple artists it only syncs the first one
 -   We request a new spotify access token every time a user makes a new request to spotify(sync a playlist)
     -   Maybe add an access token timer to check age of token before requesting a new one to lower number of spotify api requests
@@ -89,4 +91,3 @@ Demo at https://paghunie.com
             -   in this case we end up doing a new search using up 100 requests
         -   need to store the youtube video id so we don't have to repeat searches
 -   Pressing enter or on the youtube page search should submit the form and clear the form
--   Add a loading indicator when syncing playlists
