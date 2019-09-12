@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Menu, Container, Button } from 'semantic-ui-react';
 import '../containers/Youtube.css';
-import { faAutoprefixer } from '@fortawesome/free-brands-svg-icons';
 
 class NavBar extends Component {
     constructor(props) {
@@ -18,7 +17,6 @@ class NavBar extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
     searchPlaylists() {
-        console.log(this.props);
         axios
             .get(
                 `api/user/playlists?user=${
@@ -47,8 +45,8 @@ class NavBar extends Component {
     render() {
         const { pathname } = this.props.location;
         const { activeMenu } = this.state;
-        switch (pathname) {
-            case '/':
+        switch (pathname.split('/')[1]) {
+            case '':
                 return (
                     <Menu inverted={true} size="large">
                         <Container fluid={true}>
@@ -78,7 +76,7 @@ class NavBar extends Component {
                         </Container>
                     </Menu>
                 );
-            case '/login':
+            case 'login':
                 return (
                     <Menu inverted={true} size="large">
                         <Container fluid={true}>
@@ -102,7 +100,7 @@ class NavBar extends Component {
                         </Container>
                     </Menu>
                 );
-            case '/signup':
+            case 'signup':
                 return (
                     <Menu inverted={true} size="large">
                         <Container fluid={true}>
@@ -126,7 +124,7 @@ class NavBar extends Component {
                         </Container>
                     </Menu>
                 );
-            case '/profile':
+            case 'profile':
                 return (
                     <Menu
                         inverted={true}
@@ -172,7 +170,7 @@ class NavBar extends Component {
                         </Container>
                     </Menu>
                 );
-            case '/youtube':
+            case 'youtube':
                 return (
                     <Menu inverted={true} size="large">
                         <Container fluid={true}>
@@ -185,6 +183,28 @@ class NavBar extends Component {
                                 name="youtube"
                                 active={activeMenu === '/youtube'}
                                 href="/youtube"
+                            />
+                        </Container>
+                    </Menu>
+                );
+            case 'room':
+                return (
+                    <Menu inverted={true} size="large">
+                        <Container fluid={true}>
+                            <Menu.Item
+                                name="home"
+                                active={activeMenu === '/home'}
+                                href="/"
+                            />
+                            <Menu.Item
+                                name="youtube"
+                                active={activeMenu === '/youtube'}
+                                href="/youtube"
+                            />
+                            <Menu.Item
+                                name="room"
+                                active={activeMenu === '/room'}
+                                href="/room"
                             />
                         </Container>
                     </Menu>

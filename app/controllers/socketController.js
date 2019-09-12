@@ -2,7 +2,8 @@ const models = require('../../models');
 const Youtube = require('./youtubeController');
 
 exports = module.exports = io => {
-    io.sockets.on('connection', function(socket) {
+    const rooms = io.of('/rooms');
+    rooms.on('connection', function(socket) {
         //connections.push(socket);
         //console.log(`Connected: ${connections.length} sockets connected`);
 
@@ -23,7 +24,7 @@ exports = module.exports = io => {
                 socket.id + ' Disconnected: %s sockets connected',
                 connections.length
             );
-            // console.log(io.sockets.adapter.rooms['room-' + socket.roomnum])
+            // console.log(rooms.sockets.adapter.rooms['room-' + socket.roomnum])
             // console.log(socket.roomnum)
 
             // HOST DISCONNECT
@@ -33,7 +34,7 @@ exports = module.exports = io => {
             // Grabs room from userrooms data structure
             var id = socket.id;
             var roomnum = userrooms[id];
-            var room = io.sockets.adapter.rooms['room-' + roomnum];
+            var room = rooms.sockets.adapter.rooms['room-' + roomnum];
 
             // If you are not the last socket to leave
             if (room !== undefined) {
@@ -46,7 +47,7 @@ exports = module.exports = io => {
                             ' and i am leaving my responsibilities to ' +
                             Object.keys(room.sockets)[0]
                     );
-                    io.to(Object.keys(room.sockets)[0]).emit('autoHost', {
+                    rooms.to(Object.keys(room.sockets)[0]).emit('autoHost', {
                         roomnum: roomnum,
                     });
                 }
@@ -63,17 +64,19 @@ exports = module.exports = io => {
             delete userrooms[id];
         });
         */
+
         let userrooms = [];
+
         socket.on('disconnect', () => {
             let id = socket.id;
-            let room = io.sockets.adapter.rooms['room-' + userrooms[id]];
+            let room = rooms.adapter.rooms['room-' + userrooms[id]];
             //if there are still people in the room
             if (room !== undefined) {
                 //if host is leaving
                 console.log(typeof socket.id, typeof room.host);
                 if (socket.id == room.host) {
                     //reassign host
-                    io.sockets.adapter.rooms[
+                    rooms.adapter.rooms[
                         'room-' + userrooms[id]
                     ].host = Object.keys(room.sockets)[0];
                 }
@@ -84,36 +87,36 @@ exports = module.exports = io => {
 
         socket.on('queue video', data => {
             Youtube.search(models, data.search).then(results => {
-                io.sockets.adapter.rooms[
-                    'room-' + socket.roomnum
-                ].queue.yt.push(results); //add video to queue
+                rooms.adapter.rooms['room-' + socket.roomnum].queue.yt.push(
+                    results
+                ); //add video to queue
                 updateQueue(); //sends updated queue to clients
             });
         });
 
         socket.on('next video', () => {
-            currVideo = io.sockets.adapter.rooms[
+            currVideo = rooms.adapter.rooms[
                 'room-' + socket.roomnum
             ].queue.yt.shift(); //shifts next video in queue
             console.log(currVideo);
             if (currVideo !== undefined)
-                io.sockets.adapter.rooms['room-' + socket.roomnum].currVideo =
+                rooms.adapter.rooms['room-' + socket.roomnum].currVideo =
                     currVideo.videoId; //sets current video of room
             updateQueue(currVideo); //sends updated queue with the currVideo to all clients
         });
 
         socket.on('restart video', () => {
-            io.sockets.in('room-' + socket.roomnum).emit('restart video');
+            rooms.in('room-' + socket.roomnum).emit('restart video');
         });
 
         socket.on('clear queue', () => {
-            io.sockets.adapter.rooms['room-' + socket.roomnum].queue.yt = []; //empty the queue
+            rooms.adapter.rooms['room-' + socket.roomnum].queue.yt = []; //empty the queue
             updateQueue(); //send out cleared queue to clients
         });
         socket.on('update queue', data => {
             switch (data.action) {
                 case 'remove':
-                    io.sockets.adapter.rooms[
+                    rooms.adapter.rooms[
                         'room-' + socket.roomnum
                     ].queue.yt.splice(data.index, 1);
                     break;
@@ -121,7 +124,7 @@ exports = module.exports = io => {
             updateQueue();
         });
         socket.on('sync video', data => {
-            room = io.sockets.adapter.rooms['room-' + socket.roomnum];
+            room = rooms.adapter.rooms['room-' + socket.roomnum];
             if (room.host === socket.id) {
                 //manual sync request
                 console.log('syncing video time');
@@ -141,11 +144,11 @@ exports = module.exports = io => {
         });
         socket.on('sync host', () => {
             socket
-                .to(io.sockets.adapter.rooms['room-' + socket.roomnum].host)
+                .to(rooms.adapter.rooms['room-' + socket.roomnum].host)
                 .emit('sync host', { requestingSocket: socket.id });
         });
         socket.on('sync player state', data => {
-            room = io.sockets.adapter.rooms['room-' + socket.roomnum];
+            room = rooms.adapter.rooms['room-' + socket.roomnum];
             if (room.host === socket.id) {
                 console.log('syncing player state');
                 socket.broadcast
@@ -155,49 +158,45 @@ exports = module.exports = io => {
                     });
             }
         });
-        socket.on('new room', callback => {
-            console.log('joined room');
+
+        socket.on('new room', (data, callback) => {
+            console.log('joined room', rooms.adapter.rooms);
+            console.log(data);
             let init = false;
             let host = '';
             //only 1 room for now, the default room
-            roomnum = 1;
+            roomnum = data.roomnum;
             socket.roomnum = roomnum;
             userrooms[socket.id] = socket.roomnum;
             //check if room already exists
-            if (
-                io.sockets.adapter.rooms['room-' + socket.roomnum] === undefined
-            ) {
+            if (rooms.adapter.rooms['room-' + socket.roomnum] === undefined) {
                 host = socket.id;
                 init = true;
             }
             //join the room
             socket.join('room-' + roomnum);
             if (init) {
-                io.sockets.adapter.rooms['room-' + socket.roomnum].host = host;
+                rooms.adapter.rooms['room-' + socket.roomnum].host = host;
                 //room was just created so initialize the currVideo and queue
                 Youtube.default(models).then(videoId => {
-                    io.sockets.adapter.rooms[
-                        'room-' + roomnum
-                    ].currVideo = videoId;
+                    rooms.adapter.rooms['room-' + roomnum].currVideo = videoId;
                     callback({ videoId, host: true }); //sets the videoId clientside
                 });
-                io.sockets.adapter.rooms['room-' + roomnum].queue = {
+                rooms.adapter.rooms['room-' + roomnum].queue = {
                     yt: [],
                 };
             } else {
                 //room already exists
                 callback({
-                    videoId:
-                        io.sockets.adapter.rooms['room-' + roomnum].currVideo,
+                    videoId: rooms.adapter.rooms['room-' + roomnum].currVideo,
                     host: false,
                 });
                 setTimeout(
                     () =>
                         socket
                             .to(
-                                io.sockets.adapter.rooms[
-                                    'room-' + socket.roomnum
-                                ].host
+                                rooms.adapter.rooms['room-' + socket.roomnum]
+                                    .host
                             )
                             .emit('sync host', { requestingSocket: socket.id }),
                     1700
@@ -224,7 +223,7 @@ exports = module.exports = io => {
             }
             //if room doesn't exist
             if (
-                io.sockets.adapter.rooms['room-' + socket.roomnum] === undefined
+                rooms.sockets.adapter.rooms['room-' + socket.roomnum] === undefined
             ) {
                 socket.send(socket.id);
                 host = socket.id;
@@ -232,7 +231,7 @@ exports = module.exports = io => {
 
                 socket.emit('setHost');
             } else {
-                host = io.sockets.adapter.rooms['rooms-' + socket.roomnum].host;
+                host = rooms.sockets.adapter.rooms['rooms-' + socket.roomnum].host;
             }
 
             //join the room
@@ -241,40 +240,40 @@ exports = module.exports = io => {
             if (init) {
                 room = 'room-' + socket.roomnum;
                 //sets the host
-                io.sockets.adapter.rooms[room].host = host;
+                rooms.sockets.adapter.rooms[room].host = host;
                 //default player
-                io.sockets.adapter.rooms[room].currPlayer = 0;
+                rooms.sockets.adapter.rooms[room].currPlayer = 0;
                 //default video
-                io.sockets.adapter.rooms[room].currVideo = {
+                rooms.sockets.adapter.rooms[room].currVideo = {
                     yt: 'M7lc1UVf-VE',
                 };
                 //host username
-                io.sockets.adapter.rooms[room].hostName = socket.username;
+                rooms.sockets.adapter.rooms[room].hostName = socket.username;
                 //keep list of online users
-                io.sockets.adapter.rooms[room] = [socket.username];
+                rooms.sockets.adapter.rooms[room] = [socket.username];
                 //set an empty queue
-                io.sockets.adapter.rooms[room].queue = {
+                rooms.sockets.adapter.rooms[room].queue = {
                     yt: [],
                 };
             }
 
             //set host label
-            io.sockets.in(room).emit('changeHostLabel', {
-                username: io.sockets.adapter.rooms[room].hostName,
+            rooms.sockets.in(room).emit('changeHostLabel', {
+                username: rooms.sockets.adapter.rooms[room].hostName,
             });
 
             updateQueueVideos(); //gets the queue and player from the socket and sends it to the client
 
             //gets current video from room variable
-            switch (io.sockets.adapter.rooms[room].currPlayer) {
+            switch (rooms.sockets.adapter.rooms[room].currPlayer) {
                 case 0:
-                    let currVideo = io.sockets.adapter.rooms[room].currVideo.yt;
+                    let currVideo = rooms.sockets.adapter.rooms[room].currVideo.yt;
                     break;
                 default:
                     console.log('Error invalid player id');
             }
 
-            switch (io.sockts.adapter.rooms[room].currPlayer) {
+            switch (rooms.sockts.adapter.rooms[room].currPlayer) {
                 case 0:
                     //yt is default so do nothing
                     break;
@@ -296,7 +295,7 @@ exports = module.exports = io => {
                 }, 1000);
 
                 //push to users in the room
-                io.sockets.adapter.rooms[room].users.push(socket.username);
+                rooms.sockets.adapter.rooms[room].users.push(socket.username);
             } else {
                 //auto syncing, not yet implemented
                 console.log('I am the host');
@@ -327,22 +326,18 @@ exports = module.exports = io => {
             var channel = Object.keys(socket.rooms);
             //if connected to channel, broadcast message
             if (channel.length > 1) {
-                io.to(channel[0]).emit('message', msg);
+                rooms.to(channel[0]).emit('message', msg);
             }
             //otherwise emit error because client is not connected to a channel
-            else io.to(channel[0]).emit('error', 'not connected to a room');
+            else rooms.to(channel[0]).emit('error', 'not connected to a room');
         });
 
         function pingClient() {
             console.log('pinging');
-            if (
-                io.sockets.adapter.rooms['room-' + socket.roomnum] !== undefined
-            ) {
-                host = io.sockets.adapter.rooms['room-' + socket.roomnum].host;
-                io.sockets.adapter.rooms[
-                    'room-' + socket.roomnum
-                ].time = Date.now();
-                io.to(host).emit('pinging');
+            if (rooms.adapter.rooms['room-' + socket.roomnum] !== undefined) {
+                host = rooms.adapter.rooms['room-' + socket.roomnum].host;
+                rooms.adapter.rooms['room-' + socket.roomnum].time = Date.now();
+                rooms.to(host).emit('pinging');
             }
         }
 
@@ -350,8 +345,7 @@ exports = module.exports = io => {
             console.log(
                 'pong',
 
-                Date.now() -
-                    io.sockets.adapter.rooms['room-' + socket.roomnum].time
+                Date.now() - rooms.adapter.rooms['room-' + socket.roomnum].time
             );
         });
 
@@ -360,12 +354,10 @@ exports = module.exports = io => {
             currVideo === null || currVideo === undefined
                 ? (videoId = null)
                 : (videoId = currVideo.videoId);
-            if (
-                io.sockets.adapter.rooms['room-' + socket.roomnum] !== undefined
-            ) {
+            if (rooms.adapter.rooms['room-' + socket.roomnum] !== undefined) {
                 let queue =
-                    io.sockets.adapter.rooms['room-' + socket.roomnum].queue.yt;
-                io.sockets
+                    rooms.adapter.rooms['room-' + socket.roomnum].queue.yt;
+                rooms
                     .in('room-' + socket.roomnum)
                     .emit('get queue', { queue, videoId }); //emit the current queue and video
             }

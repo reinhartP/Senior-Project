@@ -162,11 +162,13 @@ class Youtube extends Component {
                         });
                 })
                 .then(() => this.sortSongs());
-        const socket = socketIOClient();
+        const socket = socketIOClient('/rooms');
         this.setState({
             socket: socket,
         });
-        socket.emit('new room', data => {
+        //url is now /youtube/:id where id is the room id
+        //if not id is defined then it will redirect to /room where they can specify a room id or be assigned one at random
+        socket.emit('new room', { roomnum: this.props.id }, data => {
             this.setState({
                 videoId: data.videoId,
                 host: data.host,
@@ -375,9 +377,7 @@ class Youtube extends Component {
                                             );
                                     }}
                                     labelKey={option => {
-                                        return `${option.song_name} - ${
-                                            option.artist_name
-                                        }`;
+                                        return `${option.song_name} - ${option.artist_name}`;
                                     }}
                                     options={this.state.options}
                                 />
@@ -604,7 +604,13 @@ class Page extends Component {
                     />
                 </Helmet>
                 <Navbar location={this.props.location} />
-                <Youtube />
+                <Youtube
+                    id={
+                        this.props.match.params.id === undefined
+                            ? -1
+                            : this.props.match.params.id
+                    }
+                />
             </div>
         );
     }
