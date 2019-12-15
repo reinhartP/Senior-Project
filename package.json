@@ -29,7 +29,7 @@
         "prerender-node": "^3.2.4",
         "request": "^2.88.0",
         "request-promise-native": "^1.0.7",
-        "sequelize": "^5.7.6",
+        "sequelize": "^5.15.1",
         "socket.io": "^2.2.0",
         "spotify-web-api-node": "^4.0.0"
     },
