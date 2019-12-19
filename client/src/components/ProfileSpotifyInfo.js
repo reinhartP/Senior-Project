@@ -80,53 +80,45 @@ class SpotifyInfo extends Component {
     render() {
         if (this.state.connected) {
             return (
-                    <Card fluid>
-                        <Card.Content>
-                            <Card.Header>
-                                <FontAwesomeIcon icon={faSpotify} /> Spotify
-                            </Card.Header>
-                        </Card.Content>
-                        <Card.Content>
-                            <Button
-                                className="green"
-                                loading={this.state.isLoading}
-                                onClick={this.updatePlaylists}
-                            >
-                                Update Playlists
-                            </Button>
-                        </Card.Content>
-                        <Card.Content>
-                            <List>
-                                {this.state.playlists.length > 0 &&
-                                    this.state.playlists.map(
-                                        (playlist, index) => {
-                                            return (
-                                                <List.Item
-                                                    key={playlist.name + index}
-                                                >
-                                                    <Button
-                                                        onClick={() =>
-                                                            this.syncPlaylist(
-                                                                playlist.name
-                                                            )
-                                                        }
-                                                    >
-                                                        Sync {playlist.name} (
-                                                        {playlist.total ||
-                                                            playlist.number_of_songs}{' '}
-                                                        songs)
-                                                    </Button>
-                                                    <Progress
-                                                        percent={0}
-                                                        indicating
-                                                    />
-                                                </List.Item>
-                                            );
-                                        }
-                                    )}
-                            </List>
-                        </Card.Content>
-                    </Card>
+                <Card fluid>
+                    <Card.Content>
+                        <Card.Header>
+                            <FontAwesomeIcon icon={faSpotify} /> Spotify
+                        </Card.Header>
+                    </Card.Content>
+                    <Card.Content>
+                        <Button
+                            className="green"
+                            loading={this.state.isLoading}
+                            onClick={this.updatePlaylists}
+                        >
+                            Update Playlists
+                        </Button>
+                    </Card.Content>
+                    <Card.Content>
+                        <List>
+                            {this.state.playlists.length > 0 &&
+                                this.state.playlists.map((playlist, index) => {
+                                    return (
+                                        <List.Item key={playlist.name + index}>
+                                            <Button
+                                                onClick={() =>
+                                                    this.syncPlaylist(
+                                                        playlist.name
+                                                    )
+                                                }
+                                            >
+                                                Sync {playlist.name} (
+                                                {playlist.total ||
+                                                    playlist.number_of_songs}{' '}
+                                                songs)
+                                            </Button>
+                                        </List.Item>
+                                    );
+                                })}
+                        </List>
+                    </Card.Content>
+                </Card>
             );
         } else {
             return (

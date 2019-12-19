@@ -18,8 +18,13 @@ class NavBar extends Component {
         this.handleChange = this.handleChange.bind(this);
     }
     searchPlaylists() {
+        console.log(this.props);
         axios
-            .get(`api/user/playlists?user=${this.state.user}`)
+            .get(
+                `api/user/playlists?user=${
+                    this.state.user === '' ? this.props.user : this.state.user
+                }`
+            )
             .then(response => {
                 this.props.sendDataToParent(response.data);
             });
