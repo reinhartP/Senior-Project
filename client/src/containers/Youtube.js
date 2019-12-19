@@ -341,13 +341,28 @@ class Youtube extends Component {
 
         return (
             <Container fluid={true}>
-                <Grid centered columns="equal" stackable>
+                <Grid
+                    style={{
+                        height: '95vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexWrap: 'nowrap',
+                        justifyContent: 'flex-start',
+                    }}
+                    centered
+                    columns="equal"
+                    stackable
+                >
+                    {/*search and add to queue row*/}
                     <GridRow
                         centered
                         columns={2}
-                        style={{ paddingTop: '0px', paddingBottom: '0px' }}
+                        style={{
+                            height: '33.5px',
+                            paddingTop: '0px',
+                            paddingBottom: '0px',
+                        }}
                     >
-                        {/*search and add to queue row*/}
                         <GridColumn width={4}>
                             <div className="input-group">
                                 <AsyncTypeahead
@@ -375,9 +390,7 @@ class Youtube extends Component {
                                             );
                                     }}
                                     labelKey={option => {
-                                        return `${option.song_name} - ${
-                                            option.artist_name
-                                        }`;
+                                        return `${option.song_name} - ${option.artist_name}`;
                                     }}
                                     options={this.state.options}
                                 />
@@ -400,7 +413,9 @@ class Youtube extends Component {
                         style={{
                             paddingTop: '0px',
                             paddingBottom: '0px',
-                            height: '720px',
+                            maxHeight: '756px',
+                            height: '100%',
+                            minHeight: '200px',
                         }}
                     >
                         {' '}
@@ -410,14 +425,15 @@ class Youtube extends Component {
                             style={{
                                 paddingRight: '0px',
                                 paddingLeft: '0px',
-                                height: '100%',
+
                                 overflowY: 'scroll',
                             }}
                         />
                         <GridColumn
                             width={10}
                             style={{
-                                height: '100%',
+                                maxWidth: '1280px',
+                                minHeight: '200px',
                                 paddingLeft: '5px',
                                 paddingRight: '5px',
                             }}
@@ -520,6 +536,7 @@ class Youtube extends Component {
                                             )
                                                 return (
                                                     <Tab
+                                                        className="playlist-tab"
                                                         size="small"
                                                         menu={{
                                                             inverted: true,
@@ -527,6 +544,7 @@ class Youtube extends Component {
                                                             secondary: true,
                                                         }}
                                                         style={{
+                                                            maxWidth: '480px',
                                                             height: '100%',
                                                         }}
                                                         panes={PlaylistSongs(
@@ -554,6 +572,7 @@ class Youtube extends Component {
                         </GridColumn>
                     </GridRow>
                     <GridRow
+                        vertialAlign="bottom"
                         centered
                         columns={3}
                         style={{ paddingTop: '10px' }}

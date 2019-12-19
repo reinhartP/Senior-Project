@@ -5,6 +5,11 @@
     max-height: 720px;
 }
 
+.playlist-tab .ui.inverted.secondary.menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
 .youtubePlayer {
     display: flex;
     max-width: 1280px;
