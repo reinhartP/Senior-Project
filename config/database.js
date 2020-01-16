@@ -1,5 +1,6 @@
 require('dotenv').config();
-
+const fs = require('fs');
+const rdsCa = fs.readFileSync(__dirname + '/rds-combined-ca-bundle.pem');
 const development = {
     username: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
@@ -11,7 +12,10 @@ const development = {
         underscored: true,
     },
     dialectOptions: {
-        ssl: 'Amazon RDS',
+        ssl: {
+            rejectUnauthorized: true,
+            ca: [rdsCa],
+        },
     },
     logging: false,
     pool: {
