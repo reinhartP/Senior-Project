@@ -44,7 +44,10 @@ const production = {
         underscored: true,
     },
     dialectOptions: {
-        ssl: 'Amazon RDS',
+        ssl: {
+            rejectUnauthorized: true,
+            ca: [rdsCa],
+        },
     },
     logging: false,
     pool: {
