@@ -1,9 +1,9 @@
 require('dotenv').config();
 const fs = require('fs');
-const rdsCa = fs.readFileSync(__dirname + '/rds-combined-ca-bundle.pem');
-const gcpCa = fs.readFileSync(__dirname + '/server-ca.pem');
-const gcpCert = fs.readFileSync(__dirname + '/client-cert.pem');
-const gcpKey = fs.readFileSync(__dirname + '/client-key.pem');
+// const rdsCa = fs.readFileSync(__dirname + '/rds-combined-ca-bundle.pem');
+// const gcpCa = fs.readFileSync(__dirname + '/server-ca.pem');
+// const gcpCert = fs.readFileSync(__dirname + '/client-cert.pem');
+// const gcpKey = fs.readFileSync(__dirname + '/client-key.pem');
 const development = {
     username: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
