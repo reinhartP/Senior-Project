@@ -36,7 +36,7 @@ const test = {
 const production = {
     username: process.env.DATABASE_USERNAME,
     password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME,
+    database: testdb,
     host: process.env.DATABASE_HOST,
     port: '3306',
     dialect: 'mysql',
