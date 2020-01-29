@@ -2,3 +2,4 @@ models/room*
 node_modules
 .env
 .eslint*
+*.pem
