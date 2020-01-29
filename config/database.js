@@ -83,12 +83,14 @@ const production = {
     },
 };
 
+// const config = {
+//     development,
+//     test,
+//     production,
+// };
 const config = {
-    development,
-    test,
     production,
 };
-
 module.exports = config;
 
 /*connect to gcp with   mysql -uroot -p -h 35.230.76.188 \
