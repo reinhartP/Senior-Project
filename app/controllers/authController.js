@@ -1,21 +1,21 @@
-const sort = require("match-sorter");
-const passport = require('passport')
-let PlaylistController = require("../controllers/playlistController"),
-    AuthController = require("../controllers/spotifyAuthController"),
-    YoutubeController = require("../controllers/youtubeController");
+const sort = require('match-sorter');
+const passport = require('passport');
+let PlaylistController = require('../controllers/playlistController'),
+    AuthController = require('../controllers/spotifyAuthController'),
+    YoutubeController = require('../controllers/youtubeController');
 //LastFmController = require('../controllers/lastFmController');
 
-const models = require("../../models");
-const querystring = require("querystring");
-    
+const models = require('../../models');
+const querystring = require('querystring');
+
 var exports = (module.exports = {});
 
 let currentUserId = '';
 exports.spotify = function(req, res, next) {
     let generateRandomString = function(length) {
-        let text = "";
+        let text = '';
         let possible =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
         for (let i = 0; i < length; i++) {
             text += possible.charAt(
@@ -25,25 +25,26 @@ exports.spotify = function(req, res, next) {
         return text;
     };
     passport.authenticate('jwt', { session: false }, (err, user, info) => {
-        currentUserId = user.id
-    })(req, res, next)
+        currentUserId = user.id;
+    })(req, res, next);
 
-    let stateKey = "spotify_auth_state";
+    let stateKey = 'spotify_auth_state';
     let state = generateRandomString(16);
     res.cookie(stateKey, state);
 
-    let scope = "user-read-private user-read-email playlist-read-private";
-    let authorizationLink = "https://accounts.spotify.com/authorize?" +
-    querystring.stringify({
-        response_type: "code",
-        client_id: process.env.SPOTIFY_CLIENT_ID,
-        scope: scope,
-        redirect_uri: process.env.SPOTIFY_CALLBACK_URL,
-        state: state,
-    })
+    let scope = 'user-read-private user-read-email playlist-read-private';
+    let authorizationLink =
+        'https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+            response_type: 'code',
+            client_id: process.env.SPOTIFY_CLIENT_ID,
+            scope: scope,
+            redirect_uri: process.env.SPOTIFY_CALLBACK_URL,
+            state: state,
+        });
     res.send({
         link: authorizationLink,
-    })
+    });
 };
 
 exports.spotifyCallback = function(req, res, next) {
@@ -62,8 +63,8 @@ exports.spotifyCallback = function(req, res, next) {
         }
     }
     const redirect = async () => {
-        res.redirect('http://localhost:3000/api/after-auth')
-    }
+        res.redirect('/api/after-auth');
+    };
     main();
 };
 
@@ -71,17 +72,14 @@ exports.spotifyPlaylist = function(req, res, next) {
     async function main() {
         //main function that does everything
         try {
-            const user = await passportJwtVerify(req, res, next)
-            const access_token = await AuthController.refresh(
-                models,
-                user.id
-            );
+            const user = await passportJwtVerify(req, res, next);
+            const access_token = await AuthController.refresh(models, user.id);
             const playlists = await PlaylistController.syncPlaylists(
                 access_token,
                 models,
                 user.id
             );
-            res.send(playlists)
+            res.send(playlists);
         } catch (err) {
             console.log(err);
         }
@@ -92,11 +90,8 @@ exports.spotifyPlaylist = function(req, res, next) {
 exports.spotifySyncPlaylist = function(req, res, next) {
     async function main() {
         try {
-            const user = await passportJwtVerify(req, res, next)
-            const access_token = await AuthController.refresh(
-                models,
-                user.id
-            );
+            const user = await passportJwtVerify(req, res, next);
+            const access_token = await AuthController.refresh(models, user.id);
             await PlaylistController.syncSongsArtists(
                 access_token,
                 models,
@@ -113,15 +108,15 @@ exports.spotifySyncPlaylist = function(req, res, next) {
 function passportJwtVerify(req, res, next) {
     return new Promise((resolve, reject) => {
         passport.authenticate('jwt', { session: false }, (err, user, info) => {
-            currentUserId = user.id
-            if(user) resolve(user)
-            reject(err)
-        })(req, res, next)
-    })
+            currentUserId = user.id;
+            if (user) resolve(user);
+            reject(err);
+        })(req, res, next);
+    });
 }
 exports.search = async function(req, res) {
     const video = await YoutubeController.search(models, req.query.search);
-    res.header("Content-Type", "application/json");
+    res.header('Content-Type', 'application/json');
     res.send(JSON.stringify(video, null, 4));
 };
 
@@ -139,7 +134,7 @@ exports.youtube = async function(req, res) {
 
 exports.getPlaylistSongs = function(req, res) {
     let User = models.user;
-    let username = req.query.user || "test";
+    let username = req.query.user || 'test';
     User.findOne({
         where: {
             username: username,
@@ -186,13 +181,13 @@ exports.getPlaylistSongs = function(req, res) {
             } else {
                 resObj = {}; //user with email not found
             }
-            res.header("Content-Type", "application/json");
+            res.header('Content-Type', 'application/json');
             res.send(JSON.stringify(resObj, null, 4));
         })
         .catch(err => console.log(err));
 };
 
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 const op = Sequelize.Op;
 
 exports.realtimeSearch = function(req, res) {
@@ -202,16 +197,16 @@ exports.realtimeSearch = function(req, res) {
         include: [
             {
                 model: models.artist,
-                as: "artist",
+                as: 'artist',
                 where: {
                     [op.or]: {
                         //returns rows that contain the query key
                         name: {
                             //matches song name or artist name
-                            [op.like]: "%" + req.query.key + "%",
+                            [op.like]: '%' + req.query.key + '%',
                         },
-                        "$song.name$": {
-                            [op.like]: "%" + req.query.key + "%",
+                        '$song.name$': {
+                            [op.like]: '%' + req.query.key + '%',
                         },
                     },
                 },
@@ -223,13 +218,13 @@ exports.realtimeSearch = function(req, res) {
             results.push({
                 //push object containing song_name and artist_name to results array
                 song_name: value.name,
-                artist_name: value["artist.name"],
+                artist_name: value['artist.name'],
                 youtube_id: value.youtube,
             });
         });
         //sort result so better matches are at the beginning of array
         let sortedResults = sort(results, req.query.key, {
-            keys: ["song_name", "artist_name"],
+            keys: ['song_name', 'artist_name'],
         });
         if (sortedResults.length > 10) {
             res.end(JSON.stringify(sortedResults.slice(0, 10)));
@@ -242,7 +237,6 @@ exports.realtimeSearch = function(req, res) {
 exports.lastfm = async function(req, res) {
     console.log(req.query.page);
     const data = await LastFmController.scrapeTrackInfo(models, req.query.page);
-    res.header("Content-Type", "application/json");
+    res.header('Content-Type', 'application/json');
     res.send(JSON.stringify(data, null, 4));
 };
-

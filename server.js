@@ -1,3 +1,4 @@
+const env = require('dotenv').config(__dirname + './env');
 const express = require('express');
 const passport = require('passport');
 const cors = require('cors');
@@ -6,7 +7,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const compression = require('compression');
 const models = require('./models');
-const env = require('dotenv').config(__dirname + './env');
 const app = express();
 const port = process.env.PORT || 4500;
 
