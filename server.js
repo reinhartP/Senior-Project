@@ -8,7 +8,7 @@ const path = require('path');
 const compression = require('compression');
 const models = require('./models');
 const app = express();
-const port = process.env.PORT || 3333;
+const port = process.env.PORT || 4500;
 
 //Sync database
 models.sequelize
