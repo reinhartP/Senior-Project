@@ -1,5 +1,5 @@
 {
-    "name": "passport-local-google",
+    "name": "paghunie-music-site",
     "version": "1.0.0",
     "description": "",
     "main": "server.js",
@@ -45,12 +45,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/reinhartP/passport-local-google.git"
+        "url": "git+https://github.com/reinhartP/Senior-Project.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/reinhartP/passport-local-google/issues"
+        "url": "https://github.com/reinhartP/Senior-Project/issues"
     },
-    "homepage": "https://github.com/reinhartP/passport-local-google#readme"
+    "homepage": "https://github.com/reinhartP/Senior-Project#readme"
 }
